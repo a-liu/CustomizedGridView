@@ -83,6 +83,7 @@ public class GridViewActivity extends AppCompatActivity {
                     new WrapGridView.Builder(this, R.id.grid_view_data_rows)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
+                            .AllRowDisplay(true)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
