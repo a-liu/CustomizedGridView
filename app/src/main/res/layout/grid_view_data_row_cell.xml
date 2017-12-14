@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center">
+    <TextView
+        android:id="@+id/grid_view_data_row_cell_header_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginBottom="-1dp"
+        android:layout_marginTop="-1dp"
+        android:layout_marginLeft="-1dp"
+        android:layout_marginRight="-1dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:theme="@style/GridViewContentLabel"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/grid_view_data_row_cell_tv"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="-1dp"
+        android:layout_marginTop="-1dp"
+        android:layout_marginLeft="-1dp"
+        android:layout_marginRight="-1dp"
+        android:paddingLeft="2dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:theme="@style/GridViewContentText"
+        android:background="@drawable/grid_view_content_text_bg"
+        android:gravity="center"
+        android:textSize="16sp" />
+
+</LinearLayout>
