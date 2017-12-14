@@ -1,12 +1,14 @@
 package com.liu.customizedgridview.gridview;
 
 import android.app.Activity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,9 +89,26 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
 
     @Override
     public GridViewDataRowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_data_row_cell, parent, false);
+//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_data_row_cell, parent, false);
+        View view = createViewById();
         final ViewHolder vh = new ViewHolder(view);
         return vh;
+    }
+
+    private View createViewById()
+    {
+        LinearLayout layout = new LinearLayout(mContext);
+        layout.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+        TextView label = new TextView(mContext);
+        label.setId(R.id.grid_view_data_row_cell_header_tv_new);
+        label.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        layout.addView(label);
+        TextView value = new TextView(mContext);
+        value.setId(R.id.grid_view_data_row_cell_tv_new);
+        value.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        layout.addView(value);
+        return layout;
     }
 //
 //    private static ViewHolder vh;
@@ -255,8 +274,8 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         public TextView mTextView;
         public ViewHolder(View view) {
             super(view);
-            mHeaderView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_header_tv);
-            mTextView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_tv);
+            mHeaderView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_header_tv_new);
+            mTextView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_tv_new);
 //            mTextView.onTouchEvent()
         }
     }
