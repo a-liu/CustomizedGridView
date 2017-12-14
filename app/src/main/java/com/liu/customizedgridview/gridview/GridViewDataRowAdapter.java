@@ -2,6 +2,7 @@ package com.liu.customizedgridview.gridview;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,7 +13,9 @@ import android.widget.Toast;
 import com.liu.customizedgridview.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Allen on 2017/4/14.
@@ -32,6 +35,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     private Activity mContext;
     private int mDisplayColumnCount;
     private int mFirstRowColumnCount;
+    private boolean mWrapRowFlag;
     private OnGridViewRowCellActionListener mOnGridViewRowCellActionListener;
     private List<GridViewCellBean> mHeaders;
     private float xDown,yDown, xUp;
@@ -41,10 +45,11 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     {
         mOnGridViewRowCellActionListener = listener;
     }
-    public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, int initColumnCount, boolean shortText) {
+    public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
         this.cellList = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mWrapRowFlag = wrapRowFlag;
         this.mDisplayColumnCount = initColumnCount;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
@@ -52,17 +57,18 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
     }
-    public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean allRowDisplay, boolean shortText) {
+    public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowExpandFlag, boolean shortText) {
         this.cellList = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mWrapRowFlag = wrapRowFlag;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
         this.mDisplayFlag = GridViewDataListAdapter.DISPLAY_ROW_MEMBER.ROW;
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
 
-        if (allRowDisplay)
+        if (allRowExpandFlag)
         {
             if (cellList != null)
             {
@@ -78,12 +84,23 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
             mDisplayColumnCount = this.mFirstRowColumnCount;
         }
     }
+
     @Override
     public GridViewDataRowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_data_row_cell, parent, false);
-        ViewHolder vh = new ViewHolder(view);
+        final ViewHolder vh = new ViewHolder(view);
         return vh;
     }
+//
+//    private static ViewHolder vh;
+//
+//    private static ViewHolder getInstance(ViewGroup parent){
+//        if(vh == null) {
+//            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_data_row_cell, parent, false);
+//            ViewHolder vh = new ViewHolder(view);
+//        }
+//        return vh;
+//    }
 
     @Override
     public void onBindViewHolder(final GridViewDataRowAdapter.ViewHolder holder, final int position) {
@@ -186,8 +203,17 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         }
         else
         {
-            holder.mHeaderView.setText(mHeaders.get(position).getText());
-            holder.mHeaderView.setVisibility(View.VISIBLE);
+            if (mWrapRowFlag)
+            {
+                holder.mHeaderView.setText(mHeaders.get(position).getText());
+                holder.mHeaderView.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                holder.mHeaderView.setText("");
+                holder.mHeaderView.setVisibility(View.GONE);
+            }
+
         }
         // 省略字符时，Toast显示
         if (this.mShortTextFlag)

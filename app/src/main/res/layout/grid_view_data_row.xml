@@ -40,6 +40,6 @@
     </LinearLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/grid_view_data_row_rv"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

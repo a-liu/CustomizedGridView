@@ -24,7 +24,8 @@ public final class WrapGridView {
     private final int mViewId;
     private List<GridViewRowBean> mHeaders;
     private List<GridViewRowBean> mRowDatas;
-    private boolean mAllRowDisplayFlag;
+    private boolean mAllRowExpandFlag;
+    private boolean mWrapRowFlag;
     private boolean mAutoFits;
     private boolean mShortTextFlag;
     //endregion
@@ -37,11 +38,10 @@ public final class WrapGridView {
         this.mViewId = builder.mViewId;
         this.mHeaders = builder.mHeaders;
         this.mRowDatas = builder.mRowDatas;
-        this.mAllRowDisplayFlag = builder.mAllRowDisplayFlag;
+        this.mWrapRowFlag = builder.mWrapRowFlag;
+        this.mAllRowExpandFlag = builder.mAllRowExpandFlag;
         this.mAutoFits = builder.mAutoFits;
         this.mShortTextFlag = builder.mShortTextFlag;
-
-
     }
 
     /* Init Grid View */
@@ -50,7 +50,8 @@ public final class WrapGridView {
         mGridViewAdapter = new GridViewDataListAdapter(this.mContext,
                 mHeaders,
                 mRowDatas,
-                this.mAllRowDisplayFlag,
+                this.mWrapRowFlag,
+                this.mAllRowExpandFlag,
                 this.mAutoFits,
                 this.mShortTextFlag,
                 null);
@@ -62,7 +63,8 @@ public final class WrapGridView {
         private final int mViewId;
         private List<GridViewRowBean> mHeaders;
         private List<GridViewRowBean> mRowDatas;
-        private boolean mAllRowDisplayFlag;
+        private boolean mAllRowExpandFlag;
+        private boolean mWrapRowFlag;
         private boolean mAutoFits;
         private boolean mShortTextFlag;
 
@@ -74,6 +76,7 @@ public final class WrapGridView {
         public Builder(Activity activity, int viewId) {
             this.mContext = activity;
             this.mViewId = viewId;
+            this.initDefaultValues();
         }
 
         public Builder headers(List<GridViewRowBean> headers) {
@@ -86,8 +89,8 @@ public final class WrapGridView {
             return this;
         }
 
-        public Builder AllRowDisplay(boolean allRowDisplay) {
-            this.mAllRowDisplayFlag = allRowDisplay;
+        public Builder allRowExpand(boolean allRowExpand) {
+            this.mAllRowExpandFlag = allRowExpand;
             return this;
         }
 
@@ -96,20 +99,24 @@ public final class WrapGridView {
             return this;
         }
 
+        public Builder wrapRowFlag(boolean wrapRowFlag) {
+            this.mWrapRowFlag = wrapRowFlag;
+            return this;
+        }
         /**
          * @return Instance of {@link WrapGridView} initiated with builder settings
          */
         public WrapGridView build() {
-            initDefaultValues();
             WrapGridView gridView = new WrapGridView(this);
             gridView.loadWrapGridView();
             return gridView;
         }
 
         private void initDefaultValues() {
-            mAllRowDisplayFlag = false;
+            mAllRowExpandFlag = false;
             mAutoFits = true;
             mShortTextFlag = false;
+            mWrapRowFlag = false;
         }
     }
 
