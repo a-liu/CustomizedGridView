@@ -12,7 +12,7 @@ import com.liu.customizedgridview.gridview.WrapGridView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GridViewActivity extends AppCompatActivity {
+public class WrapGridViewActivity extends AppCompatActivity {
     private List<GridViewRowBean> rowHeaders = new ArrayList<>();
     private List<GridViewRowBean> rowDatas = new ArrayList<>();
 
@@ -85,7 +85,7 @@ public class GridViewActivity extends AppCompatActivity {
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
-                    .wrapRowFlag(false)
+                    .wrapRowFlag(true)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();

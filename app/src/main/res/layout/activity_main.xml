@@ -83,7 +83,11 @@
         android:layout_height="wrap_content"
         android:text="指纹识别"
         android:visibility="gone" />
-
+    <Button
+        android:id="@+id/wrap_grid_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="折行表格" />
     <Button
         android:id="@+id/dynamic_grid_btn"
         android:layout_width="match_parent"

@@ -1,32 +1,18 @@
-/**
- * tfme Android client application
- *
- * @author Andy Scherzinger
- * Copyright (C) 2016 tfme GmbH.
- * <p/>
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2,
- * as published by the Free Software Foundation.
- * <p/>
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * <p/>
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package com.liu.customizedgridview.gridview;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,9 +23,6 @@ import com.liu.customizedgridview.utils.DisplayUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-/**
- * This Adapter populates a ListView with all accounts within the app.
- */
 public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
 
     private DISPLAY_ROW_MEMBER mDisplayFlag;
@@ -48,8 +31,9 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
     private List<GridViewRowBean> mRowDatas;
     private GridViewRowBean mCurrentRow;
     private Activity mContext = null;
-    private static int mTotalColumnSpan = 40;
+    private int mTotalColumnSpan;
     private int parentContainerWidth = 0;
+    private final int CELL_BLANK_LENGTH = 0;
 
 //    private GridViewDataListAdapter.GridViewListAdapterListener mListener;
     private Drawable mTintedCheck;
@@ -83,6 +67,27 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.calculateRowColSetting(rows);
         if (autoWidth)
         {
+//            if (wrapRowFlag)
+//            {
+//                if(DisplayUtils.isPad(this.mContext))
+//                {
+//                    mTotalColumnSpan = (int)(parentContainerWidth / DisplayUtils.getDisplayFontPxForPad(mGridViewCellFontSize));
+//                }
+//                else
+//                {
+//                    mTotalColumnSpan = (int)(parentContainerWidth / DisplayUtils.getDisplayFontPx(mGridViewCellFontSize));
+//                }
+//                this.calculateColSpan(headers, rows, initColLength);
+//            } else {
+//                mTotalColumnSpan = 0;
+//                for(int i=0; i< initColLength.length; i++)
+//                {
+//                    mTotalColumnSpan += initColLength[i];
+//                }
+//                mTotalColumnSpan += initColLength.length * CELL_BLANK_LENGTH;
+//                this.calculateColSpan(headers, rows, initColLength);
+//
+//            }
             if (wrapRowFlag)
             {
                 if(DisplayUtils.isPad(this.mContext))
@@ -95,14 +100,14 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                 }
                 this.calculateColSpan(headers, rows, initColLength);
             } else {
-                mTotalColumnSpan = 0;
+                // 非折行时容器定宽显示
                 for(int i=0; i< initColLength.length; i++)
                 {
                     mTotalColumnSpan += initColLength[i];
                 }
-                mTotalColumnSpan += initColLength.length;
+                // 填补空白单元格
+                mTotalColumnSpan += initColLength.length * CELL_BLANK_LENGTH;
                 this.calculateColSpan(headers, rows, initColLength);
-
             }
         }
 
@@ -145,16 +150,16 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                 }
                 this.calculateColSpan(headers, rows, initColLength);
             } else {
-                mTotalColumnSpan = 0;
+                // 非折行时容器定宽显示
                 for(int i=0; i< initColLength.length; i++)
                 {
                     mTotalColumnSpan += initColLength[i];
                 }
-                mTotalColumnSpan += initColLength.length;
+                // 填补空白单元格
+                mTotalColumnSpan += initColLength.length * CELL_BLANK_LENGTH;
                 this.calculateColSpan(headers, rows, initColLength);
             }
         }
-
         // 计算完列宽后初始化标题栏
         this.initHeader();
     }
@@ -200,11 +205,11 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
         final GridViewHeaderListAdapter listHeaderAdapter;
         if (this.mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
         {
-            listHeaderAdapter = new GridViewHeaderListAdapter(mContext, mHeaders, mRowDatas, mTotalColumnSpan, mAllRowExpandFlag, mShortTextFlag, null);
+            listHeaderAdapter = new GridViewHeaderListAdapter(mContext, mHeaders, mRowDatas,mWrapRowFlag, mTotalColumnSpan, mAllRowExpandFlag, mShortTextFlag, null);
         }
         else
         {
-            listHeaderAdapter = new GridViewHeaderListAdapter(mContext, mHeaders, mRowDatas, mTotalColumnSpan, mInitColumnCount, mShortTextFlag, null);
+            listHeaderAdapter = new GridViewHeaderListAdapter(mContext, mHeaders, mRowDatas, mWrapRowFlag, mTotalColumnSpan, mInitColumnCount, mShortTextFlag, null);
         }
         listHeaderView.setAdapter(listHeaderAdapter);
     }
@@ -241,31 +246,16 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
             boolean newLine = true;
             for(int i=0; i< cells.size(); i++)
             {
-                if (!mWrapRowFlag)
-                {
-                    cells.get(i).setColSpan(lengthDatas[i] + 1);
-                    continue;
-                }
-//                String cellText = "";
-//                if (this.mShortTextFlag)
-//                {
-//                    cellText = cells.get(i).getShortText();
-//                }
-//                else
-//                {
-//                    cellText = cells.get(i).getText();
-//                }
                 int span = 0;
                 int headerSpan = 0;
-                span = lengthDatas[i];
-//                if (cellText != null)
-//                {
-//                    try {
-//                        span = cellText.getBytes("GBK").length;
-//                    } catch (UnsupportedEncodingException e) {
-//                        span = cellText.getBytes().length;
-//                    }
-//                }
+                if (!mWrapRowFlag)
+                {
+                    span = lengthDatas[i] + CELL_BLANK_LENGTH;
+                }
+                else
+                {
+                    span = lengthDatas[i];
+                }
                 if (headers.get(0).getColumnCells().get(i).getText() != null && !newLine)
                 {
                     try {
@@ -279,24 +269,14 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                 {
                     int nextSpan = 0;
                     int nextHeaderSpan = 0;
-//                    String nextCellText = "";
-//                    if (this.mShortTextFlag)
-//                    {
-//                        nextCellText = cells.get(i+1).getShortText();
-//                    }
-//                    else
-//                    {
-//                        nextCellText = cells.get(i+1).getText();
-//                    }
-//                    if (nextCellText != null)
-//                    {
-//                        try {
-//                            nextSpan = nextCellText.getBytes("GBK").length;
-//                        } catch (UnsupportedEncodingException e) {
-//                            nextSpan = nextCellText.getBytes().length;
-//                        }
-//                    }
-                    nextSpan = lengthDatas[i+1];
+                    if (!mWrapRowFlag)
+                    {
+                        nextSpan = lengthDatas[i + 1] + CELL_BLANK_LENGTH;
+                    }
+                    else
+                    {
+                        nextSpan = lengthDatas[+ 1];
+                    }
                     if (headers.get(0).getColumnCells().get(i+1).getText() != null && !newLine)
                     {
                         try {
@@ -306,7 +286,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                         }
                     }
                     nextSpan += nextHeaderSpan;
-                    if (colSpan + nextSpan >= mTotalColumnSpan)
+                    if (colSpan + nextSpan > mTotalColumnSpan)
                     {
                         span += mTotalColumnSpan - colSpan;
                         colSpan = 0;
@@ -338,8 +318,6 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
             convertView = inflater.inflate(R.layout.grid_view_data_row, parent, false);
             viewHolder = new GridViewCellItemViewHolder();
             viewHolder.rowData = (RecyclerView) convertView.findViewById(R.id.grid_view_data_row_rv);
-//            viewHolder.expand = (ImageView) convertView.findViewById(R.id.expand_img);
-//            viewHolder.collapse = (ImageView) convertView.findViewById(R.id.collapse_img);
             viewHolder.rowNumber = (TextView) convertView.findViewById(R.id.grid_view_data_row_number);
             convertView.setTag(viewHolder);
 
@@ -373,6 +351,8 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
             else
             {
                 viewHolder.rowNumber.setVisibility(View.GONE);
+                int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(mGridViewCellFontSize));
+                viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
             }
 
 

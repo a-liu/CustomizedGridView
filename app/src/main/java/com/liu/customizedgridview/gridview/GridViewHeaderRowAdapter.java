@@ -14,12 +14,6 @@ import com.liu.customizedgridview.R;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Allen on 2017/4/14.
- *
- * 评论页面的适配器
- */
-
 public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeaderRowAdapter.ViewHolder> {
     private GridViewDataListAdapter.DISPLAY_ROW_MEMBER mDisplayFlag;
     private List<GridViewCellBean> cellList;
@@ -30,6 +24,7 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
 
     private boolean mShortTextFlag;
     private Activity mContext;
+    private boolean mWrapRowFlag;
     private int mDisplayColumnCount;
     private int mFirstRowColumnCount;
     private OnGridViewRowCellActionListener mOnGridViewRowCellActionListener;
@@ -38,10 +33,11 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
     {
         mOnGridViewRowCellActionListener = listener;
     }
-    public GridViewHeaderRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, int initColumnCount, boolean shortText) {
+    public GridViewHeaderRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
         this.cellList = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mWrapRowFlag = wrapRowFlag;
         this.mDisplayColumnCount = initColumnCount;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
@@ -49,10 +45,11 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
     }
-    public GridViewHeaderRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean allRowDisplay, boolean shortText) {
+    public GridViewHeaderRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowDisplay, boolean shortText) {
         this.cellList = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mWrapRowFlag = wrapRowFlag;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
         this.mDisplayFlag = GridViewDataListAdapter.DISPLAY_ROW_MEMBER.ROW;

@@ -20,7 +20,11 @@ public class DisplayUtils {
 				& Configuration.SCREENLAYOUT_SIZE_MASK)
 				>= Configuration.SCREENLAYOUT_SIZE_LARGE;
 	}
-
+	public static float getActualDisplayFontPx(int fontSize) {
+		float result = 0;
+		result = ((fontSize) / 72.0F) * 96.0F;
+		return result;
+	}
 	public static float getDisplayFontPx(int fontSize) {
 		float result = 0;
 		result = ((fontSize + 4) / 72.0F) * 96.0F;

@@ -21,12 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Allen on 2017/4/14.
- *
- * 评论页面的适配器
- */
-
 public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRowAdapter.ViewHolder> {
     private GridViewDataListAdapter.DISPLAY_ROW_MEMBER mDisplayFlag;
     private List<GridViewCellBean> cellList;
