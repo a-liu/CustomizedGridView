@@ -10,19 +10,20 @@ android:orientation="vertical">
     android:divider="@color/colorPrimaryDark"
     android:dividerHeight="0dip">
 </ListView>
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
+    <!--<HorizontalScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0dp"-->
+        <!--android:layout_weight="1"-->
+        <!--android:layout_margin="10dp"-->
+        <!--&gt;-->
         <ListView
             android:id="@+id/grid_view_data_rows"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:dividerHeight="0dip">
         </ListView>
 
-    </HorizontalScrollView>
+    <!--</HorizontalScrollView>-->
 
 </LinearLayout>
 

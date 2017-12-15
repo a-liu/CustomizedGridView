@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -89,10 +91,23 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
 
     @Override
     public GridViewDataRowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = null;
+//        if (!mWrapRowFlag)
+//        {
+//            view = createViewById();
+//        }
+//        else
+//        {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_data_row_cell, parent, false);
+//        }
 //        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_data_row_cell, parent, false);
-        View view = createViewById();
+
         final ViewHolder vh = new ViewHolder(view);
         return vh;
+    }
+    public int dp2px(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+                mContext.getResources().getDisplayMetrics());
     }
 
     private View createViewById()
@@ -100,14 +115,29 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         LinearLayout layout = new LinearLayout(mContext);
         layout.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         layout.setOrientation(LinearLayout.HORIZONTAL);
-        TextView label = new TextView(mContext);
-        label.setId(R.id.grid_view_data_row_cell_header_tv_new);
-        label.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        layout.addView(label);
-        TextView value = new TextView(mContext);
-        value.setId(R.id.grid_view_data_row_cell_tv_new);
-        value.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        layout.addView(value);
+        TextView tvLabel = new TextView(mContext);
+        LinearLayout.LayoutParams layoutParams1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        layoutParams1.setMargins(dp2px(-1),dp2px(-1),dp2px(-1),dp2px(-1));
+        layoutParams1.gravity = Gravity.CENTER;
+        tvLabel.setLayoutParams(layoutParams1);
+        tvLabel.setPadding(dp2px(5),dp2px(5),dp2px(5),dp2px(5));
+        tvLabel.setGravity(Gravity.CENTER);
+        tvLabel.setTextSize(16);
+        tvLabel.setVisibility(View.GONE);
+        tvLabel.setId(R.id.grid_view_data_row_cell_header_tv_new);
+        layout.addView(tvLabel);
+
+        TextView tvValue = new TextView(mContext);
+        LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams2.weight = 1;
+        layoutParams2.setMargins(dp2px(-1),dp2px(-1),dp2px(-1),dp2px(-1));
+        tvValue.setLayoutParams(layoutParams2);
+        tvValue.setPadding(dp2px(2),dp2px(5),dp2px(5),dp2px(0));
+        tvValue.setGravity(Gravity.CENTER);
+        tvValue.setTextSize(16);
+        tvValue.setId(R.id.grid_view_data_row_cell_tv_new);
+        tvValue.setBackgroundResource(R.drawable.grid_view_content_text_bg);
+        layout.addView(tvValue);
         return layout;
     }
 //
@@ -274,8 +304,16 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         public TextView mTextView;
         public ViewHolder(View view) {
             super(view);
-            mHeaderView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_header_tv_new);
-            mTextView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_tv_new);
+//            if (!mWrapRowFlag)
+//            {
+//                mHeaderView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_header_tv_new);
+//                mTextView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_tv_new);
+//            }
+//            else {
+                mHeaderView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_header_tv);
+                mTextView = (TextView) view.findViewById(R.id.grid_view_data_row_cell_tv);
+//            }
+
 //            mTextView.onTouchEvent()
         }
     }

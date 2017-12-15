@@ -70,7 +70,8 @@ public class GridViewActivity extends AppCompatActivity {
             for(int j=0; j< bodyValues.length; j++)
             {
                 int colIndex = j+1;
-                GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
+//                GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
+                GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex, String.format("%d%d:%s",rowIndex, colIndex, bodyValues[j]));
                 cellBean.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
                 rowCells.add(cellBean);
             }
@@ -83,8 +84,8 @@ public class GridViewActivity extends AppCompatActivity {
                     new WrapGridView.Builder(this, R.id.grid_view_data_rows)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
-                    .allRowExpand(true)
-                            .wrapRowFlag(false)
+                    .allRowExpand(false)
+                    .wrapRowFlag(true)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();

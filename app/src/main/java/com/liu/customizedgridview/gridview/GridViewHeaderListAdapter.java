@@ -72,7 +72,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
 //        this.mAvatarRadiusDimension = context.getResources().getDimension(R.dimen.list_item_avatar_icon_radius);
         this.mTintedCheck = tintedCheck;
         this.mShortTextFlag = shortText;
-        parentContainerWidth = DisplayUtils.getDisplayWidth(context) -41;
+        parentContainerWidth = DisplayUtils.getDisplayWidth(context);
         this.calculateRowColSetting(rows);
         mTotalColumnSpan = totalColumnSpan;
     }
@@ -92,7 +92,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.ROW;
         this.mTintedCheck = tintedCheck;
         this.mShortTextFlag = shortText;
-        parentContainerWidth = DisplayUtils.getDisplayWidth(context) - 41;
+        parentContainerWidth = DisplayUtils.getDisplayWidth(context);
 
         this.calculateRowColSetting(rows);
         mTotalColumnSpan = totalColumnSpan;
