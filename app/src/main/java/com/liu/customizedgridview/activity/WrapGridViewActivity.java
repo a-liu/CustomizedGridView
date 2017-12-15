@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 
 import com.liu.customizedgridview.R;
+import com.liu.customizedgridview.gridview.CustomizedGridView;
 import com.liu.customizedgridview.gridview.GridViewCellBean;
 import com.liu.customizedgridview.gridview.GridViewRowBean;
 import com.liu.customizedgridview.gridview.WrapGridView;
@@ -80,8 +81,7 @@ public class WrapGridViewActivity extends AppCompatActivity {
             rowDatas.add(rowBean);
         }
         try {
-            WrapGridView gridView =
-                    new WrapGridView.Builder(this, R.id.grid_view_data_rows)
+            CustomizedGridView customizedGridView = new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
                     .allRowExpand(false)

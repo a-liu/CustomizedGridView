@@ -4,7 +4,7 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical">
 <ListView
-    android:id="@+id/grid_view_header_row"
+    android:id="@+id/grid_view_header_row1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:divider="@color/colorPrimaryDark"
@@ -17,7 +17,7 @@ android:orientation="vertical">
         android:layout_margin="0dp"
         >
         <ListView
-            android:id="@+id/grid_view_data_rows"
+            android:id="@+id/grid_view_data_rows1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:dividerHeight="0dip">

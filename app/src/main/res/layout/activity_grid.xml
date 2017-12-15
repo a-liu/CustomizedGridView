@@ -4,9 +4,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-    <include
-        layout="@layout/grid_view_row_layout"
+    <!--<include-->
+        <!--layout="@layout/grid_view_row_layout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--/>-->
+    <com.liu.customizedgridview.gridview.CustomizedGridViewLayout
+        android:id="@+id/customized_grid_view_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        />
+        android:orientation="vertical"
+        >
+    </com.liu.customizedgridview.gridview.CustomizedGridViewLayout>
 </LinearLayout>

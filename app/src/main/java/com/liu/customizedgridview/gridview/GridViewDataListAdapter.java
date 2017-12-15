@@ -201,11 +201,11 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
 
     private void initHeader()
     {
-        final ListView listHeaderView = (ListView) mContext.findViewById(R.id.grid_view_header_row);
+        final ListView listHeaderView = (ListView) mContext.findViewById(R.id.grid_view_header_right_rows);
         final GridViewHeaderListAdapter listHeaderAdapter;
         if (this.mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
         {
-            listHeaderAdapter = new GridViewHeaderListAdapter(mContext, mHeaders, mRowDatas,mWrapRowFlag, mTotalColumnSpan, mAllRowExpandFlag, mShortTextFlag, null);
+            listHeaderAdapter = new GridViewHeaderListAdapter(mContext, mHeaders, mRowDatas, mWrapRowFlag, mTotalColumnSpan, mAllRowExpandFlag, mShortTextFlag, null);
         }
         else
         {
