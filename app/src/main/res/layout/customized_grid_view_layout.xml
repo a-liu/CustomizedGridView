@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/customized_grid_view_linear_layout"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical">
         <LinearLayout
+            android:id="@+id/customized_grid_view_layout_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-                <!--<ListView-->
-                    <!--android:id="@+id/grid_view_header_left_row"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:divider="@color/colorPrimaryDark"-->
-                    <!--android:dividerHeight="0dip"-->
-                    <!--&gt;-->
-                <!--</ListView>-->
+            android:orientation="horizontal"
+            android:divider="@drawable/grid_view_content_text_bg"
+            >
+                <ListView
+                    android:id="@+id/grid_view_header_left_rows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@color/colorPrimaryDark"
+                    android:dividerHeight="0dip"
+                    >
+                </ListView>
+                <com.liu.customizedgridview.gridview.HScrollView
+                    android:id="@+id/grid_view_header_right_scroll"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="0dp"
+                    android:scrollbars="none"
+                    >
                 <ListView
                     android:id="@+id/grid_view_header_right_rows"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:divider="@color/colorPrimaryDark"
                     android:dividerHeight="0dip">
                 </ListView>
+                </com.liu.customizedgridview.gridview.HScrollView>
         </LinearLayout>
 
-        <!--<ListView-->
-            <!--android:id="@+id/grid_view_header_right_rows"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:divider="@color/colorPrimaryDark"-->
-            <!--android:dividerHeight="0dip">-->
-        <!--</ListView>-->
-
-        <!--<ListView-->
-            <!--android:id="@+id/grid_view_data_right_rows"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:dividerHeight="0dip">-->
-        <!--</ListView>-->
-        <!---->
         <LinearLayout
+            android:id="@+id/customized_grid_view_layout_body"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -48,26 +48,29 @@ android:orientation="vertical">
             android:divider="@drawable/grid_view_content_text_bg"
             android:visibility="visible"
             >
-                <!--<ListView-->
-                    <!--android:id="@+id/grid_view_data_left_rows"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="match_parent"-->
-                    <!--android:dividerHeight="0dip">-->
-                <!--</ListView>-->
-                <!--<HorizontalScrollView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="0dp"-->
-                <!--android:layout_weight="1"-->
-                <!--android:layout_margin="0dp"-->
-                <!--&gt;-->
-                <ListView
+                <com.liu.customizedgridview.gridview.VListView
+                    android:id="@+id/grid_view_data_left_rows"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="none"
+                    android:dividerHeight="0dip">
+                </com.liu.customizedgridview.gridview.VListView>
+                <com.liu.customizedgridview.gridview.HScrollView
+                        android:id="@+id/grid_view_data_right_scroll"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="0dp"
+                        android:scrollbars="none"
+                        >
+                <com.liu.customizedgridview.gridview.VListView
                     android:id="@+id/grid_view_data_right_rows"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:dividerHeight="0dip">
-                </ListView>
+                </com.liu.customizedgridview.gridview.VListView>
 
-                <!--</HorizontalScrollView>-->
+                </com.liu.customizedgridview.gridview.HScrollView>
 
 
         </LinearLayout>

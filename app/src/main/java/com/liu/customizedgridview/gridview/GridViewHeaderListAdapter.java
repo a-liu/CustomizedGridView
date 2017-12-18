@@ -26,14 +26,14 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
     private List<GridViewRowBean> mRowDatas;
     private GridViewRowBean mCurrentRow;
     private Activity mContext = null;
-    private static int mTotalColumnSpan = 40;
-    private int parentContainerWidth = 0;
+    private int mTotalColumnSpan;
+//    private int parentContainerWidth = 0;
     //    private GridViewDataListAdapter.GridViewListAdapterListener mListener;
     private Drawable mTintedCheck;
     private boolean mWrapRowFlag;
     private boolean mShortTextFlag;
     private boolean mAllRowDisplayFlag = true;
-    private int mGridViewCellFontSize = 16;
+//    private int mGridViewCellFontSize = 16;
     private int mInitColumnCount;
     private List<GridViewRowBean> mHeaders;
     public GridViewHeaderListAdapter(Activity context,
@@ -55,7 +55,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
 //        this.mAvatarRadiusDimension = context.getResources().getDimension(R.dimen.list_item_avatar_icon_radius);
         this.mTintedCheck = tintedCheck;
         this.mShortTextFlag = shortText;
-        parentContainerWidth = DisplayUtils.getDisplayWidth(context);
+//        parentContainerWidth = DisplayUtils.getDisplayWidth(context);
         this.calculateRowColSetting(rows);
         mTotalColumnSpan = totalColumnSpan;
     }
@@ -77,7 +77,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.ROW;
         this.mTintedCheck = tintedCheck;
         this.mShortTextFlag = shortText;
-        parentContainerWidth = DisplayUtils.getDisplayWidth(context);
+//        parentContainerWidth = DisplayUtils.getDisplayWidth(context);
 
         this.calculateRowColSetting(rows);
         mTotalColumnSpan = totalColumnSpan;
@@ -127,12 +127,12 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
                 {
                     rowNumberTextLength = 3;
                 }
-                viewHolder.rowBlank.setWidth((int)(DisplayUtils.getDisplayFontPx(mGridViewCellFontSize) * rowNumberTextLength));
+                viewHolder.rowBlank.setWidth((int)(DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE) * rowNumberTextLength));
             }
             else
             {
                 viewHolder.rowBlank.setVisibility(View.GONE);
-                int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(mGridViewCellFontSize));
+                int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
                 viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
             }
 

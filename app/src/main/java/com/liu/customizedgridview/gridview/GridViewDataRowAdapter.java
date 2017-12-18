@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRowAdapter.ViewHolder> {
     private GridViewDataListAdapter.DISPLAY_ROW_MEMBER mDisplayFlag;
     private List<GridViewCellBean> cellList;

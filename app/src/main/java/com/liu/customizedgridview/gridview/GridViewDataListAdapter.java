@@ -49,7 +49,6 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                                    int initColumnCount,
                                    boolean wrapRowFlag,
                                    int totalColumnSpan,
-                                   boolean autoWidth,
                                    boolean shortText,
                                    Drawable tintedCheck) {
         super(context, -1, rows);
@@ -72,7 +71,6 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                                    boolean wrapRowFlag,
                                    int totalColumnSpan,
                                    boolean allRowExpandFlag,
-                                   boolean autoWidth,
                                    boolean shortText,
                                    Drawable tintedCheck) {
         super(context, -1, rows);

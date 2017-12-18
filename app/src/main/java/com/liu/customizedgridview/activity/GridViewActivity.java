@@ -80,29 +80,16 @@ public class GridViewActivity extends AppCompatActivity {
             rowDatas.add(rowBean);
         }
         try {
-            CustomizedGridView customizedGridView = new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
+            new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
                     .wrapRowFlag(false)
+                    .fixColumnCount(2)
                     .build();
-
-//            WrapGridView gridView =
-//                    new WrapGridView.Builder(this, R.id.grid_view_data_rows)
-//                    .headers(rowHeaders)
-//                    .rowDatas(rowDatas)
-//                    .allRowExpand(false)
-//                    .wrapRowFlag(false)
-//                    .build();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        ListView listDataView = (ListView) findViewById(R.id.grid_view_data_rows);
-//        GridViewDataListAdapter listDataAdapter = new GridViewDataListAdapter(this, rowHeaders, rowDatas, false, true, false, null);
-//        listDataView.setAdapter(listDataAdapter);
-
-
     }
 
 }

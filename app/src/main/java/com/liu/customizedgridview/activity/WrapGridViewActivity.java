@@ -80,7 +80,7 @@ public class WrapGridViewActivity extends AppCompatActivity {
             rowDatas.add(rowBean);
         }
         try {
-            CustomizedGridView customizedGridView = new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
+            new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
@@ -89,12 +89,6 @@ public class WrapGridViewActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        ListView listDataView = (ListView) findViewById(R.id.grid_view_data_rows);
-//        GridViewDataListAdapter listDataAdapter = new GridViewDataListAdapter(this, rowHeaders, rowDatas, false, true, false, null);
-//        listDataView.setAdapter(listDataAdapter);
-
-
     }
 
 }
