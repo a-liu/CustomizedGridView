@@ -8,7 +8,6 @@ import com.liu.customizedgridview.R;
 import com.liu.customizedgridview.gridview.CustomizedGridView;
 import com.liu.customizedgridview.gridview.GridViewCellBean;
 import com.liu.customizedgridview.gridview.GridViewRowBean;
-import com.liu.customizedgridview.gridview.WrapGridView;
 
 import java.util.ArrayList;
 import java.util.List;
