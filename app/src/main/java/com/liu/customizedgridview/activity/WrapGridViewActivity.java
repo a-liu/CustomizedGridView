@@ -59,7 +59,7 @@ public class WrapGridViewActivity extends AppCompatActivity {
             rowHeaders.add(rowBean);
         }
 
-        for (int i=0; i< 100; i++)
+        for (int i=0; i< 30; i++)
         {
             GridViewRowBean rowBean = new GridViewRowBean();
             int rowIndex = i+1;

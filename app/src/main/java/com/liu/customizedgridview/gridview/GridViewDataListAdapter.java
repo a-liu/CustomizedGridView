@@ -115,15 +115,17 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
             {
                 int rowNumber = position + 1;
                 int rowNumberTextLength = String.valueOf(mRowDatas.size()).length();
-                if (rowNumberTextLength < 3)
+                if (rowNumberTextLength < 5)
                 {
-                    rowNumberTextLength = 3;
+                    rowNumberTextLength = 5;
                 }
                 viewHolder.rowNumber.setVisibility(View.VISIBLE);
                 viewHolder.rowNumber.setText(String.valueOf(rowNumber));
                 viewHolder.rowNumber.setWidth((int)(DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE)
                         * rowNumberTextLength)
                 );
+                int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
+                viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
             }
             else
             {

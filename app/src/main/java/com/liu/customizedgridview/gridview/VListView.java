@@ -48,13 +48,13 @@ public class VListView extends ListView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        super.onInterceptTouchEvent(ev)
-        boolean result = mTouchEnable;
-
-        return result;
-    }
+//    @Override
+//    public boolean onInterceptTouchEvent(MotionEvent ev) {
+////        super.onInterceptTouchEvent(ev)
+//        boolean result = mTouchEnable;
+//
+//        return result;
+//    }
 
     @Override
     protected void onScrollChanged(int l, int t, int oldL, int oldT) {

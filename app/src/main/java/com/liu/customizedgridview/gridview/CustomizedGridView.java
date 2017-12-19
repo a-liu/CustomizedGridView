@@ -102,7 +102,7 @@ public final class CustomizedGridView {
         mGridViewLayout.setGridView(this);
         // 左抬头
         mHeaderListLeft = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_left_rows);
-        if (mLeftHeaders != null)
+        if (!mWrapRowFlag)
         {
             width = (int)(mLeftHeaderTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
             mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
@@ -116,6 +116,10 @@ public final class CustomizedGridView {
                             mAllRowExpandFlag,
                             mShortTextFlag, null);
             mHeaderListLeft.setAdapter(gridViewHeaderLeftAdapter);
+        }
+        else
+        {
+            mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayoutCompat.LayoutParams.MATCH_PARENT));
         }
 
         // 右抬头
@@ -300,7 +304,8 @@ public final class CustomizedGridView {
         }
         else
         {
-
+            mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
+            mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
         }
 
 
@@ -366,8 +371,15 @@ public final class CustomizedGridView {
                 {
                     mTotalColumnSpan = (int)(parentContainerWidth / DisplayUtils.getDisplayFontPx(CELL_FONT_SIZE));
                 }
-                this.calculateColSpan(this.mHeaders, this.mRowDatas, initColLength);
+                // 去除行号
+                int numberLength = String.valueOf(this.mRowDatas.size()).length();
+                if (numberLength < 5)
+                {
+                    numberLength = 5;
+                }
+                mTotalColumnSpan -= numberLength;
 
+                this.calculateColSpan(this.mHeaders, this.mRowDatas, initColLength);
                 mRightHeaderTotalColumnSpan += mTotalColumnSpan;
                 mRightDataTotalColumnSpan += mTotalColumnSpan;
             } else {

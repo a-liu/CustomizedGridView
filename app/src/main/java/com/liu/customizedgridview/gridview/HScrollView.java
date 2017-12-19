@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.HorizontalScrollView;
 
 /**
@@ -38,7 +39,7 @@ public class HScrollView extends HorizontalScrollView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-     @Override
+    @Override
     public void onScrollChanged(int x, int y, int oldX, int oldY)
      {
          super.onScrollChanged(x, y, oldX, oldY);

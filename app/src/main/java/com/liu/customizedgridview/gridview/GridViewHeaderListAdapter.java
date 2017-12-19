@@ -121,13 +121,15 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
             // 行号
             // 折行时显示
             if (mWrapRowFlag) {
-                viewHolder.rowBlank.setText("No.");
+                viewHolder.rowBlank.setText( " No. ");
                 int rowNumberTextLength = String.valueOf(mRowDatas.size()).length();
-                if (rowNumberTextLength < 3)
+                if (rowNumberTextLength < 5)
                 {
-                    rowNumberTextLength = 3;
+                    rowNumberTextLength = 5;
                 }
                 viewHolder.rowBlank.setWidth((int)(DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE) * rowNumberTextLength));
+                int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
+                viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
             }
             else
             {

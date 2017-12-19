@@ -27,14 +27,14 @@ android:orientation="vertical">
                     android:layout_margin="0dp"
                     android:scrollbars="none"
                     >
-                <ListView
-                    android:id="@+id/grid_view_header_right_rows"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:divider="@color/colorPrimaryDark"
-                    android:dividerHeight="0dip">
-                </ListView>
+                        <ListView
+                            android:id="@+id/grid_view_header_right_rows"
+                            android:layout_width="match_parent"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:divider="@color/colorPrimaryDark"
+                            android:dividerHeight="0dip">
+                        </ListView>
                 </com.liu.customizedgridview.gridview.HScrollView>
         </LinearLayout>
 
@@ -65,7 +65,7 @@ android:orientation="vertical">
                                 <com.liu.customizedgridview.gridview.VListView
                                     android:id="@+id/grid_view_data_left_rows"
                                     android:layout_width="match_parent"
-                                    android:layout_height="1000dp"
+                                    android:layout_height="match_parent"
                                     android:scrollbars="none"
                                     android:dividerHeight="0dip">
                                 </com.liu.customizedgridview.gridview.VListView>
