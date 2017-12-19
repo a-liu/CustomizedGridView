@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.AbsListView;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
@@ -21,6 +22,15 @@ public class VListView extends ListView {
     public void setListViewListener(ListViewListener listViewListener) {
         this.mListViewListener = listViewListener;
     }
+
+    private boolean mTouchEnable = true;
+    public boolean GetTouchEnable() {
+        return mTouchEnable;
+    }
+    public void setTouchEnable(boolean touchEnable) {
+        this.mTouchEnable = touchEnable;
+    }
+
     public VListView(Context context) {
         super(context);
     }
@@ -39,9 +49,20 @@ public class VListView extends ListView {
     }
 
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        super.onInterceptTouchEvent(ev)
+        boolean result = mTouchEnable;
+
+        return result;
+    }
+
+    @Override
     protected void onScrollChanged(int l, int t, int oldL, int oldT) {
         super.onScrollChanged(l, t, oldL, oldT);
-        mListViewListener.onScrollChanged(this, l, t, oldL, oldT);
+        if (mListViewListener != null)
+        {
+            mListViewListener.onScrollChanged(this, l, t, oldL, oldT);
+        }
     }
 
     public interface ListViewListener{

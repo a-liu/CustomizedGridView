@@ -20,7 +20,7 @@ android:orientation="vertical">
                     >
                 </ListView>
                 <com.liu.customizedgridview.gridview.HScrollView
-                    android:id="@+id/grid_view_header_right_scroll"
+                    android:id="@+id/grid_view_header_right_h_scroll"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -56,7 +56,7 @@ android:orientation="vertical">
                     android:dividerHeight="0dip">
                 </com.liu.customizedgridview.gridview.VListView>
                 <com.liu.customizedgridview.gridview.HScrollView
-                        android:id="@+id/grid_view_data_right_scroll"
+                        android:id="@+id/grid_view_data_right_h_scroll"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"

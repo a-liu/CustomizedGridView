@@ -2,16 +2,11 @@ package com.liu.customizedgridview.gridview;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.LinearLayoutCompat;
-import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -43,8 +38,8 @@ public final class CustomizedGridView {
     private ListView mHeaderListRight;
     private VListView mDataListLeft;
     private VListView mDataListRight;
-    private HScrollView mRightHeaderScroll;
-    private HScrollView mRightDataScroll;
+    private HScrollView mRightHeaderHScroll;
+    private HScrollView mRightDataHScroll;
     private HScrollView.ScrollViewListener mRightHeaderScrollListener;
     private HScrollView.ScrollViewListener mRightDataScrollListener;
     private int parentContainerWidth = 0;
@@ -136,16 +131,52 @@ public final class CustomizedGridView {
                 this.mShortTextFlag,
                 null);
         mDataListLeft.setAdapter(gridViewDataLeftAdapter);
-        mDataListLeft.setListViewListener(new VListView.ListViewListener(){
-            @Override
-            public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
-                if (mDataListRight != null)
-                {
-                    mDataListRight.scrollTo(l, t);
-                }
-            }
-        });
-//        // 右数据
+//        mDataListLeft.setTouchEnable(false);
+//        mDataListLeft.setOnScrollListener(new AbsListView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(AbsListView view, int scrollState) {
+//                if (mDataListRight != null &&
+//                    scrollState == SCROLL_STATE_IDLE ||
+//                    scrollState == SCROLL_STATE_TOUCH_SCROLL  )
+//                {
+////                    View subView = view.getChildAt(0);
+////                    if (subView != null)
+////                    {
+////                        int top = subView.getTop();
+////                        mDataListRight.smoothScrollToPositionFromTop(view.getFirstVisiblePosition(), top);
+////                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onScroll(AbsListView view, int firstVisibleItem,
+//                                 int visibleItemCount, int totalItemCount) {
+//                if (mDataListRight != null)
+//                {
+////                    View subView = view.getChildAt(0);
+////                    if (subView != null)
+////                    {
+////                        int top = subView.getTop();
+////                        mDataListRight.smoothScrollToPositionFromTop(firstVisibleItem, top);
+////                    }
+//                }
+//            }
+//        });
+////        mDataListLeft.setListViewListener(new VListView.ListViewListener(){
+////            @Override
+////            public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
+////                if (mDataListRight != null )
+////                {
+////                    View subView = scrollView.getChildAt(0);
+////                    if (subView != null)
+////                    {
+////                        int top = subView.getTop();
+////                        mDataListRight.smoothScrollToPositionFromTop(scrollView.getFirstVisiblePosition(), top);
+////                    }
+////                }
+////            }
+////        });
+        // 右数据
         mDataListRight = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_right_rows);
         GridViewDataListAdapter gridViewDataRightAdapter = new GridViewDataListAdapter(this.mContext,
                 mRightHeaders,
@@ -156,49 +187,62 @@ public final class CustomizedGridView {
                 this.mShortTextFlag,
                 null);
         mDataListRight.setAdapter(gridViewDataRightAdapter);
-        mDataListRight.setListViewListener(new VListView.ListViewListener(){
-            @Override
-            public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
-                if (mDataListLeft != null)
-                {
-//                    mDataListLeft.smoothScrollToPosition(scrollView.getScrollY());
+//        mDataListRight.setOnScrollListener(new AbsListView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(AbsListView view, int scrollState) {
+//                if (mDataListLeft != null &&
+//                        scrollState == SCROLL_STATE_IDLE ||
+//                        scrollState == SCROLL_STATE_TOUCH_SCROLL  )
+//                {
+//                    View subView = view.getChildAt(0);
+//                    if (subView != null)
+//                    {
+//                        int top = subView.getTop();
+//                        mDataListLeft.smoothScrollToPositionFromTop(view.getFirstVisiblePosition(), top);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onScroll(AbsListView view, int firstVisibleItem,
+//                                 int visibleItemCount, int totalItemCount) {
+//                if (mDataListLeft != null)
+//                {
+//                    View subView = view.getChildAt(0);
+//                    if (subView != null)
+//                    {
+//                        int top = subView.getTop();
+//                        mDataListLeft.smoothScrollToPositionFromTop(firstVisibleItem, top);
+//                    }
+//                }
+//            }
+//        });
 
-                    Log.d("GView", "onScrollChanged(" + " l:" + l + " t:" + t + " )");
-                    Log.d("GView", "onScrollChangedXY(" + " l:" + mDataListRight.getScrollX() + " t:" + mDataListRight.getScrollY() + " )");
-                    mDataListLeft.scrollTo(mDataListRight.getScrollX(), mDataListRight.getScrollY());
-                }
-            }
-        });
-
-        mRightHeaderScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_scroll);
-        mRightDataScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_scroll);
+        mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
+        mRightDataHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_h_scroll);
         mRightDataScrollListener = new HScrollView.ScrollViewListener() {
             @Override
             public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
-//                if (mRightHeaderScrollListener != null)
-//                {
-//                    mRightHeaderScrollListener.onScrollChanged(mRightHeaderScroll, x, y, oldX, oldY);
-//                }
-                if (mRightHeaderScroll != null)
+
+                if (mRightHeaderHScroll != null)
                 {
-                    mRightHeaderScroll.smoothScrollTo(x, y);
+                    mRightHeaderHScroll.smoothScrollTo(x, y);
                 }
             }
         };
+
         mRightHeaderScrollListener = new HScrollView.ScrollViewListener() {
             @Override
             public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
-                if (mRightDataScroll != null)
+                if (mRightDataHScroll != null)
                 {
-                    mRightDataScroll.smoothScrollTo(x, y);
-//                    mRightDataScrollListener.onScrollChanged(mRightDataScroll, x, y, oldX, oldY);
+                    mRightDataHScroll.smoothScrollTo(x, y);
                 }
-
             }
         };
 
-        mRightDataScroll.setScrollViewListener(mRightDataScrollListener);
-        mRightHeaderScroll.setScrollViewListener(mRightHeaderScrollListener);
+        mRightDataHScroll.setScrollViewListener(mRightDataScrollListener);
+        mRightHeaderHScroll.setScrollViewListener(mRightHeaderScrollListener);
     }
 
     private void addFixRowNumbers()
