@@ -48,30 +48,53 @@ android:orientation="vertical">
             android:divider="@drawable/grid_view_content_text_bg"
             android:visibility="visible"
             >
-                <com.liu.customizedgridview.gridview.VListView
-                    android:id="@+id/grid_view_data_left_rows"
+                <com.liu.customizedgridview.gridview.VScrollView
+                    android:id="@+id/grid_view_data_left_v_scroll"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_margin="0dp"
                     android:scrollbars="none"
-                    android:dividerHeight="0dip">
-                </com.liu.customizedgridview.gridview.VListView>
-                <com.liu.customizedgridview.gridview.HScrollView
-                        android:id="@+id/grid_view_data_right_h_scroll"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:layout_margin="0dp"
-                        android:scrollbars="none"
-                        >
-                <com.liu.customizedgridview.gridview.VListView
-                    android:id="@+id/grid_view_data_right_rows"
-                    android:layout_width="match_parent"
+                    >
+                        <com.liu.customizedgridview.gridview.HScrollView
+                            android:id="@+id/grid_view_data_left_h_scroll"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_margin="0dp"
+                            android:scrollbars="none"
+                            >
+                                <com.liu.customizedgridview.gridview.VListView
+                                    android:id="@+id/grid_view_data_left_rows"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1000dp"
+                                    android:scrollbars="none"
+                                    android:dividerHeight="0dip">
+                                </com.liu.customizedgridview.gridview.VListView>
+                        </com.liu.customizedgridview.gridview.HScrollView>
+                </com.liu.customizedgridview.gridview.VScrollView>
+                <com.liu.customizedgridview.gridview.VScrollView
+                    android:id="@+id/grid_view_data_right_v_scroll"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:dividerHeight="0dip">
-                </com.liu.customizedgridview.gridview.VListView>
+                    android:layout_weight="1"
+                    android:layout_margin="0dp"
+                    android:scrollbars="none"
+                    >
+                        <com.liu.customizedgridview.gridview.HScrollView
+                                android:id="@+id/grid_view_data_right_h_scroll"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_margin="0dp"
+                                android:scrollbars="none"
+                                >
+                        <com.liu.customizedgridview.gridview.VListView
+                            android:id="@+id/grid_view_data_right_rows"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:dividerHeight="0dip">
+                        </com.liu.customizedgridview.gridview.VListView>
 
-                </com.liu.customizedgridview.gridview.HScrollView>
-
+                        </com.liu.customizedgridview.gridview.HScrollView>
+                </com.liu.customizedgridview.gridview.VScrollView>
 
         </LinearLayout>
 

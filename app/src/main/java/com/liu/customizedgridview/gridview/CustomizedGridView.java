@@ -6,10 +6,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 
 import com.liu.customizedgridview.R;
 import com.liu.customizedgridview.utils.DisplayUtils;
@@ -29,7 +35,7 @@ public final class CustomizedGridView {
      */
     public static final int CELL_BLANK_LENGTH = 0;
     public static final int CELL_FONT_SIZE = 16;
-
+    public static final int ROW_HEIGHT = 93;
     //region private Fields
     private CustomizedGridViewLayout mGridViewLayout;
     private CustomizedGridView mCustomizedGridView;
@@ -40,8 +46,12 @@ public final class CustomizedGridView {
     private VListView mDataListRight;
     private HScrollView mRightHeaderHScroll;
     private HScrollView mRightDataHScroll;
-    private HScrollView.ScrollViewListener mRightHeaderScrollListener;
-    private HScrollView.ScrollViewListener mRightDataScrollListener;
+    private VScrollView mLeftDataVScroll;
+    private VScrollView mRightDataVScroll;
+//    private HScrollView.ScrollViewListener mRightHeaderHScrollListener;
+//    private HScrollView.ScrollViewListener mRightDataHScrollListener;
+//    private VScrollView.ScrollViewListener mLeftDataVScrollListener;
+//    private VScrollView.ScrollViewListener mRightDataVScrollListener;
     private int parentContainerWidth = 0;
 
     private View mRootView;
@@ -84,26 +94,29 @@ public final class CustomizedGridView {
 
     /* Init Grid View */
     private void loadGridView() {
+        int height = 0;
+        int width = 0;
         this.prevSetting();
 
         mGridViewLayout = (CustomizedGridViewLayout) mRootView.findViewById(mViewId);
         mGridViewLayout.setGridView(this);
-        int width = 0;
         // 左抬头
         mHeaderListLeft = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_left_rows);
-        width = (int)(mLeftHeaderTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
-        mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-        GridViewHeaderListAdapter gridViewHeaderLeftAdapter =
-                new GridViewHeaderListAdapter(
-                        mContext,
-                        mLeftHeaders,
-                        mLeftRowDatas,
-                        mWrapRowFlag,
-                        mLeftHeaderTotalColumnSpan,
-                        mAllRowExpandFlag,
-                        mShortTextFlag, null);
-        mHeaderListLeft.setAdapter(gridViewHeaderLeftAdapter);
-
+        if (mLeftHeaders != null)
+        {
+            width = (int)(mLeftHeaderTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
+            mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+            GridViewHeaderListAdapter gridViewHeaderLeftAdapter =
+                    new GridViewHeaderListAdapter(
+                            mContext,
+                            mLeftHeaders,
+                            mLeftRowDatas,
+                            mWrapRowFlag,
+                            mLeftHeaderTotalColumnSpan,
+                            mAllRowExpandFlag,
+                            mShortTextFlag, null);
+            mHeaderListLeft.setAdapter(gridViewHeaderLeftAdapter);
+        }
 
         // 右抬头
         mHeaderListRight = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_right_rows);
@@ -120,18 +133,20 @@ public final class CustomizedGridView {
 
         // 左数据
         mDataListLeft = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_left_rows);
-        width = (int)(mLeftDataTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
-        mDataListLeft.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-        GridViewDataListAdapter gridViewDataLeftAdapter = new GridViewDataListAdapter(this.mContext,
-                mLeftHeaders,
-                mLeftRowDatas,
-                this.mWrapRowFlag,
-                this.mLeftDataTotalColumnSpan,
-                this.mAllRowExpandFlag,
-                this.mShortTextFlag,
-                null);
-        mDataListLeft.setAdapter(gridViewDataLeftAdapter);
-//        mDataListLeft.setTouchEnable(false);
+        if (mLeftRowDatas != null)
+        {
+            height = (int)(mLeftRowDatas.size() * CustomizedGridView.ROW_HEIGHT);
+            mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+            GridViewDataListAdapter gridViewDataLeftAdapter = new GridViewDataListAdapter(this.mContext,
+                    mLeftHeaders,
+                    mLeftRowDatas,
+                    this.mWrapRowFlag,
+                    this.mLeftDataTotalColumnSpan,
+                    this.mAllRowExpandFlag,
+                    this.mShortTextFlag,
+                    null);
+            mDataListLeft.setAdapter(gridViewDataLeftAdapter);
+            //        mDataListLeft.setTouchEnable(false);
 //        mDataListLeft.setOnScrollListener(new AbsListView.OnScrollListener() {
 //            @Override
 //            public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -176,75 +191,127 @@ public final class CustomizedGridView {
 ////                }
 ////            }
 ////        });
+        }
+
+
         // 右数据
         mDataListRight = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_right_rows);
-        GridViewDataListAdapter gridViewDataRightAdapter = new GridViewDataListAdapter(this.mContext,
-                mRightHeaders,
-                mRightRowDatas,
-                this.mWrapRowFlag,
-                this.mRightDataTotalColumnSpan,
-                this.mAllRowExpandFlag,
-                this.mShortTextFlag,
-                null);
-        mDataListRight.setAdapter(gridViewDataRightAdapter);
-//        mDataListRight.setOnScrollListener(new AbsListView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(AbsListView view, int scrollState) {
-//                if (mDataListLeft != null &&
-//                        scrollState == SCROLL_STATE_IDLE ||
-//                        scrollState == SCROLL_STATE_TOUCH_SCROLL  )
-//                {
-//                    View subView = view.getChildAt(0);
-//                    if (subView != null)
-//                    {
-//                        int top = subView.getTop();
-//                        mDataListLeft.smoothScrollToPositionFromTop(view.getFirstVisiblePosition(), top);
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onScroll(AbsListView view, int firstVisibleItem,
-//                                 int visibleItemCount, int totalItemCount) {
-//                if (mDataListLeft != null)
-//                {
-//                    View subView = view.getChildAt(0);
-//                    if (subView != null)
-//                    {
-//                        int top = subView.getTop();
-//                        mDataListLeft.smoothScrollToPositionFromTop(firstVisibleItem, top);
-//                    }
-//                }
-//            }
-//        });
-
-        mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
-        mRightDataHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_h_scroll);
-        mRightDataScrollListener = new HScrollView.ScrollViewListener() {
-            @Override
-            public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
-
-                if (mRightHeaderHScroll != null)
-                {
-                    mRightHeaderHScroll.smoothScrollTo(x, y);
+        height = (int)(mRightRowDatas.size() * CustomizedGridView.ROW_HEIGHT);
+        mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        if (mRightRowDatas != null)
+        {
+            GridViewDataListAdapter gridViewDataRightAdapter = new GridViewDataListAdapter(this.mContext,
+                    mRightHeaders,
+                    mRightRowDatas,
+                    this.mWrapRowFlag,
+                    this.mRightDataTotalColumnSpan,
+                    this.mAllRowExpandFlag,
+                    this.mShortTextFlag,
+                    null);
+            mDataListRight.setAdapter(gridViewDataRightAdapter);
+            mDataListRight.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    if (mDataListLeft != null &&
+                            scrollState == SCROLL_STATE_IDLE ||
+                            scrollState == SCROLL_STATE_TOUCH_SCROLL  )
+                    {
+                        View subView = view.getChildAt(0);
+                        if (subView != null)
+                        {
+                            int top = subView.getTop();
+                            mDataListLeft.smoothScrollToPositionFromTop(view.getFirstVisiblePosition(), top);
+                        }
+                    }
                 }
-            }
-        };
 
-        mRightHeaderScrollListener = new HScrollView.ScrollViewListener() {
-            @Override
-            public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
-                if (mRightDataHScroll != null)
-                {
-                    mRightDataHScroll.smoothScrollTo(x, y);
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem,
+                                     int visibleItemCount, int totalItemCount) {
+                    if (mDataListLeft != null)
+                    {
+                        View subView = view.getChildAt(0);
+                        if (subView != null)
+                        {
+                            int top = subView.getTop();
+                            mDataListLeft.smoothScrollToPositionFromTop(firstVisibleItem, top);
+                        }
+                    }
                 }
-            }
-        };
+            });
+        }
 
-        mRightDataHScroll.setScrollViewListener(mRightDataScrollListener);
-        mRightHeaderHScroll.setScrollViewListener(mRightHeaderScrollListener);
+        if (!mWrapRowFlag)
+        {
+            mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
+            mRightDataHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_h_scroll);
+            HScrollView.ScrollViewListener rightDataHScrollListener = new HScrollView.ScrollViewListener() {
+                @Override
+                public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
+
+                    if (mRightHeaderHScroll != null)
+                    {
+                        mRightHeaderHScroll.smoothScrollTo(x, y);
+                    }
+                }
+            };
+
+            HScrollView.ScrollViewListener rightHeaderHScrollListener = new HScrollView.ScrollViewListener() {
+                @Override
+                public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
+                    if (mRightDataHScroll != null)
+                    {
+                        mRightDataHScroll.smoothScrollTo(x, y);
+                    }
+                }
+            };
+
+            mRightDataHScroll.setScrollViewListener(rightDataHScrollListener);
+            mRightHeaderHScroll.setScrollViewListener(rightHeaderHScrollListener);
+
+            mRightDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_v_scroll);
+            mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
+            // 设定高度、宽度
+//        height = (int)(mLeftRowDatas.size() * CustomizedGridView.ROW_HEIGHT);
+            width = (int)(mLeftDataTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
+            mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
+
+            VScrollView.ScrollViewListener leftDataVScrollListener = new VScrollView.ScrollViewListener() {
+                @Override
+                public void onScrollChanged(ScrollView scrollView, int x, int y, int oldX, int oldY) {
+                    if (mRightDataVScroll != null)
+                    {
+                        mRightDataVScroll.smoothScrollTo(x, y);
+                    }
+                }
+            };
+            VScrollView.ScrollViewListener rightDataVScrollListener = new VScrollView.ScrollViewListener() {
+                @Override
+                public void onScrollChanged(ScrollView scrollView, int x, int y, int oldX, int oldY) {
+
+                    if (mLeftDataVScroll != null)
+                    {
+                        mLeftDataVScroll.smoothScrollTo(x, y);
+                    }
+                }
+            };
+            mLeftDataVScroll.setScrollViewListener(leftDataVScrollListener);
+            mRightDataVScroll.setScrollViewListener(rightDataVScrollListener);
+        }
+        else
+        {
+
+        }
+
+
+
     }
 
+
+    public int dp2px(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+                mContext.getResources().getDisplayMetrics());
+    }
     private void addFixRowNumbers()
     {
         if (mfixColumnCount <= 0 || this.mWrapRowFlag)
@@ -266,7 +333,7 @@ public final class CustomizedGridView {
             {
                 GridViewRowBean row = this.mHeaders.get(i);
                 String id = "headerCol" + i;
-                String value = "No.";
+                String value = " No. ";
                 GridViewCellBean cell = new GridViewCellBean(id, value);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
@@ -285,7 +352,7 @@ public final class CustomizedGridView {
     {
         this.addFixRowNumbers();
         parentContainerWidth = DisplayUtils.getDisplayWidth(this.mContext);
-        int[] initColLength = this.calculateColumnTextLength(this.mRowDatas);
+        int[] initColLength = this.calculateColumnTextLength(this.mHeaders, this.mRowDatas);
         this.calculateRowColSetting(this.mRowDatas);
         if (this.mAutoFits)
         {
@@ -300,6 +367,9 @@ public final class CustomizedGridView {
                     mTotalColumnSpan = (int)(parentContainerWidth / DisplayUtils.getDisplayFontPx(CELL_FONT_SIZE));
                 }
                 this.calculateColSpan(this.mHeaders, this.mRowDatas, initColLength);
+
+                mRightHeaderTotalColumnSpan += mTotalColumnSpan;
+                mRightDataTotalColumnSpan += mTotalColumnSpan;
             } else {
                 // 非折行时容器定宽显示
                 for(int i=0; i< initColLength.length; i++)
@@ -328,8 +398,6 @@ public final class CustomizedGridView {
                 this.calculateColSpan(this.mHeaders, this.mRowDatas, initColLength);
             }
         }
-
-
         // 冻结列的设定
         fixColumnSetting();
     }
@@ -361,7 +429,6 @@ public final class CustomizedGridView {
             for(int i=0; i< mfixColumnCount; i++)
             {
                 row.getColumnCells().add(this.mHeaders.get(j).getColumnCells().get(i));
-//                this.mHeaders.get(j).getColumnCells().remove(this.mHeaders.get(j).getColumnCells().get(i));
             }
         }
 
@@ -375,7 +442,6 @@ public final class CustomizedGridView {
             for(int i=0; i< mfixColumnCount; i++)
             {
                 row.getColumnCells().add(this.mRowDatas.get(j).getColumnCells().get(i));
-//                this.mRowDatas.get(j).getColumnCells().remove(this.mRowDatas.get(j).getColumnCells().get(i));
             }
         }
 
@@ -389,7 +455,6 @@ public final class CustomizedGridView {
             for(int i=mfixColumnCount; i< this.mHeaders.get(j).getColumnCells().size(); i++)
             {
                 row.getColumnCells().add(this.mHeaders.get(j).getColumnCells().get(i));
-//                this.mHeaders.get(j).getColumnCells().remove(this.mHeaders.get(j).getColumnCells().get(i));
             }
         }
 
@@ -403,19 +468,34 @@ public final class CustomizedGridView {
             for(int i=mfixColumnCount; i< this.mRowDatas.get(j).getColumnCells().size(); i++)
             {
                 row.getColumnCells().add(this.mRowDatas.get(j).getColumnCells().get(i));
-//                this.mRowDatas.get(j).getColumnCells().remove(this.mRowDatas.get(j).getColumnCells().get(i));
             }
         }
 
     }
 
-    private int[] calculateColumnTextLength(List<GridViewRowBean> rowDatas)
+    private int[] calculateColumnTextLength(List<GridViewRowBean> rowHeaders, List<GridViewRowBean> rowDatas)
     {
-        if (rowDatas == null || rowDatas.size() == 0)
+        if (rowHeaders == null || rowHeaders.size() == 0)
         {
             return null;
         }
-        int[] result = new int [rowDatas.get(0).getColumnCells().size()];
+        int[] result = new int [rowHeaders.get(0).getColumnCells().size()];
+        for (int i=0; i<rowHeaders.size(); i++) {
+            for(int j=0;j<rowHeaders.get(i).getColumnCells().size(); j++)
+            {
+                String cellText = rowHeaders.get(i).getColumnCells().get(j).getText();
+                int length = 0;
+                try {
+                    length = cellText.getBytes("GBK").length;
+                } catch (UnsupportedEncodingException e) {
+                    length = cellText.getBytes().length;
+                }
+                if (result[j] < length)
+                {
+                    result[j] = length;
+                }
+            }
+        }
         for (int i=0; i<rowDatas.size(); i++)
         {
             for(int j=0;j<rowDatas.get(i).getColumnCells().size(); j++)

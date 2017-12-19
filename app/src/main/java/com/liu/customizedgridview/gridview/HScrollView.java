@@ -42,7 +42,10 @@ public class HScrollView extends HorizontalScrollView {
     public void onScrollChanged(int x, int y, int oldX, int oldY)
      {
          super.onScrollChanged(x, y, oldX, oldY);
-         mScrollViewListener.onScrollChanged(this, x, y, oldX, oldY);
+         if (mScrollViewListener != null)
+         {
+             mScrollViewListener.onScrollChanged(this, x, y, oldX, oldY);
+         }
      }
 
     public interface ScrollViewListener {

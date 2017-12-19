@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.liu.customizedgridview.R;
@@ -102,6 +103,9 @@ public class CustomizedGridViewLayout extends ViewGroup {
             if (childView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)
             {
                 cParams = (MarginLayoutParams) childView.getLayoutParams();
+            } else if(childView.getLayoutParams() instanceof FrameLayout.LayoutParams)
+            {
+                cParams = (FrameLayout.LayoutParams) childView.getLayoutParams();
             }
             else {
                 cParams = new ViewGroup.MarginLayoutParams(childView.getLayoutParams());
@@ -162,6 +166,10 @@ public class CustomizedGridViewLayout extends ViewGroup {
             if (childView.getLayoutParams() instanceof ViewGroup.MarginLayoutParams)
             {
                 cParams = (MarginLayoutParams) childView.getLayoutParams();
+            }
+            else if(childView.getLayoutParams() instanceof FrameLayout.LayoutParams)
+            {
+                cParams = (FrameLayout.LayoutParams) childView.getLayoutParams();
             }
             else {
                 cParams = new ViewGroup.MarginLayoutParams(childView.getLayoutParams());

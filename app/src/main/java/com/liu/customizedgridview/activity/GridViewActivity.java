@@ -59,7 +59,7 @@ public class GridViewActivity extends AppCompatActivity {
             rowHeaders.add(rowBean);
         }
 
-        for (int i=0; i< 100; i++)
+        for (int i=0; i< 20; i++)
         {
             GridViewRowBean rowBean = new GridViewRowBean();
             int rowIndex = i+1;

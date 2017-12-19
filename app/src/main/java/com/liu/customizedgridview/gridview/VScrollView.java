@@ -4,13 +4,13 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
-import android.widget.HorizontalScrollView;
+import android.widget.ScrollView;
 
 /**
  * Created by liu.jianfei on 2017/12/18.
  */
 
-public class VScrollView extends HorizontalScrollView {
+public class VScrollView extends ScrollView {
     private ScrollViewListener mScrollViewListener;
     public ScrollViewListener getScrollViewListener() {
         return mScrollViewListener;
@@ -42,10 +42,14 @@ public class VScrollView extends HorizontalScrollView {
     public void onScrollChanged(int x, int y, int oldX, int oldY)
      {
          super.onScrollChanged(x, y, oldX, oldY);
-         mScrollViewListener.onScrollChanged(this, x, y, oldX, oldY);
+         if (mScrollViewListener != null)
+         {
+             mScrollViewListener.onScrollChanged(this, x, y, oldX, oldY);
+         }
+
      }
 
     public interface ScrollViewListener {
-        void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY);
+        void onScrollChanged(ScrollView scrollView, int x, int y, int oldX, int oldY);
     }
 }
