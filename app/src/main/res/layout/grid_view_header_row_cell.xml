@@ -18,14 +18,37 @@
         android:paddingBottom="5dp"
         android:background="@drawable/grid_view_header_label_bg"
         android:theme="@style/GridViewHeaderTitle"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
+    <TextView
+        android:id="@+id/grid_view_header_row_cell_asc_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="-10dp"
+        android:gravity="center_vertical"
+        android:padding="0dp"
+        android:theme="@style/GridViewHeaderTitle"
+        android:background="@drawable/grid_view_none_border_bg"
+        android:textSize="16sp"
+        android:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/grid_view_header_row_cell_desc_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="-10dp"
+        android:gravity="center_vertical"
+        android:padding="0dp"
+        android:theme="@style/GridViewHeaderTitle"
+        android:background="@drawable/grid_view_none_border_bg"
+        android:textSize="16sp"
+        android:visibility="gone"/>
     <!--<ImageView-->
         <!--android:id="@+id/sort_asc_img"-->
         <!--android:layout_width="20dp"-->
         <!--android:layout_height="wrap_content"-->
         <!--android:layout_marginBottom="0dp"-->
         <!--android:layout_marginTop="0dp"-->
-        <!--android:background="@color/wave_color"-->
+        <!--android:background="@drawable/grid_view_header_label_bg"-->
         <!--android:src="@drawable/arrow_down"-->
         <!--android:visibility="visible"-->
         <!--/>-->
@@ -35,7 +58,7 @@
         <!--android:layout_height="wrap_content"-->
         <!--android:layout_marginBottom="0dp"-->
         <!--android:layout_marginTop="0dp"-->
-        <!--android:background="@color/wave_color"-->
+        <!--android:background="@drawable/grid_view_header_label_bg"-->
         <!--android:src="@drawable/arrow_up"-->
         <!--android:visibility="gone"-->
         <!--/>-->

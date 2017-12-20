@@ -2,6 +2,8 @@ package com.liu.customizedgridview.gridview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -18,7 +20,11 @@ import com.liu.customizedgridview.R;
 
 public class CustomizedGridViewLayout extends ViewGroup {
     private CustomizedGridView mGridViewManage;
-
+    private OnLoadCompleteListener mOnLoadCompleteListener;
+    public void setOnLoadCompleteListener(OnLoadCompleteListener onLoadCompleteListener)
+    {
+        mOnLoadCompleteListener = onLoadCompleteListener;
+    }
     public CustomizedGridViewLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater mInflater = LayoutInflater.from(context);
@@ -47,9 +53,6 @@ public class CustomizedGridViewLayout extends ViewGroup {
         this.mGridViewManage = gridView;
     }
 
-    /**
-     * 要求所有的孩子测量自己的大小，然后根据这些孩子的大小完成自己的尺寸测量
-     */
     @SuppressLint("NewApi") @Override
     protected void onMeasure( int widthMeasureSpec, int heightMeasureSpec) {
 //        // 计算出所有的childView的宽和高
@@ -146,9 +149,6 @@ public class CustomizedGridViewLayout extends ViewGroup {
                 : height);
     }
 
-    /**
-     * 为所有的子控件摆放位置.
-     */
     @Override
     protected void onLayout( boolean changed, int left, int top, int right, int bottom) {
         int cCount = getChildCount();
@@ -205,5 +205,18 @@ public class CustomizedGridViewLayout extends ViewGroup {
             cb = cHeight + ct;
             childView.layout(cl, ct, cr, cb);
         }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (mOnLoadCompleteListener != null)
+        {
+            mOnLoadCompleteListener.onLoadComplete(this);
+        }
+    }
+
+    public interface OnLoadCompleteListener{
+        void onLoadComplete(View view);
     }
 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,14 +30,16 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
     private int mFirstRowColumnCount;
     private OnGridViewRowCellActionListener mOnGridViewRowCellActionListener;
     private List<GridViewCellBean> mHeaders;
+    private int mFixColumnCount;
     public void setOnGridViewRowCellActionListener(OnGridViewRowCellActionListener listener)
     {
         mOnGridViewRowCellActionListener = listener;
     }
-    public GridViewHeaderRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
+    public GridViewHeaderRowAdapter(Activity context, int totalSpan, int fixColumnCount, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
         this.cellList = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mFixColumnCount = fixColumnCount;
         this.mWrapRowFlag = wrapRowFlag;
         this.mDisplayColumnCount = initColumnCount;
         selectList = new ArrayList<>();
@@ -45,10 +48,11 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
     }
-    public GridViewHeaderRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowDisplay, boolean shortText) {
+    public GridViewHeaderRowAdapter(Activity context, int totalSpan, int fixColumnCount, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowDisplay, boolean shortText) {
         this.cellList = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mFixColumnCount = fixColumnCount;
         this.mWrapRowFlag = wrapRowFlag;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
@@ -90,12 +94,11 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
             holder.mTextView.setText(this.mHeaders.get(position).getText());
         }
         holder.mTextView.setVisibility(View.VISIBLE);
+        holder.mAscTextView.setText("△");
+        holder.mDescTextView.setText("▽");
         holder.itemView.setTag(this.mHeaders.get(position));
         holder.mTextView.setGravity(this.mHeaders.get(position).getGravity());
-
-        if (this.mHeaders.get(position).getColNumber() < mFirstRowColumnCount)
-        {
-            holder.mTextView.setOnTouchListener(new View.OnTouchListener() {
+        holder.mTextView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -103,18 +106,19 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
                                 && mCurrentDownEvent != null
                                 && isConsideredDoubleTap(mCurrentDownEvent,
                                 mPreviousUpEvent, event)) {
-//                            Toast.makeText(mContext, "double clicked.",
-//                                    Toast.LENGTH_SHORT).show();
-                            if (mDisplayColumnCount < mHeaders.size())
+                            if (holder.mAscTextView.getVisibility() == View.VISIBLE)
                             {
-                                mDisplayColumnCount = mHeaders.size();
+                                holder.mDescTextView.setVisibility(View.VISIBLE);
+                                holder.mAscTextView.setVisibility(View.GONE);
+                                mOnGridViewRowCellActionListener.onDataSort(GridViewHeaderRowAdapter.this, v, position, mFixColumnCount, GridViewBeanComparator.ORDER_TYPE.DESC);
                             }
                             else
                             {
-                                mDisplayColumnCount = mFirstRowColumnCount;
+                                holder.mDescTextView.setVisibility(View.GONE);
+                                holder.mAscTextView.setVisibility(View.VISIBLE);
+                                mOnGridViewRowCellActionListener.onDataSort(GridViewHeaderRowAdapter.this, v, position, mFixColumnCount, GridViewBeanComparator.ORDER_TYPE.ASC);
                             }
 
-                            mOnGridViewRowCellActionListener.onFirstRowDoubleClicked(GridViewHeaderRowAdapter.this, v);
                         }
                         mCurrentDownEvent = MotionEvent.obtain(event);
                     } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -123,8 +127,6 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
                     return true;
                 }
             });
-        }
-
         holder.mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,9 +146,17 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView mTextView;
+        public TextView mAscTextView;
+        public TextView mDescTextView;
+//        public ImageView mAscImage;
+//        public ImageView mDescImage;
         public ViewHolder(View view) {
             super(view);
             mTextView = (TextView) view.findViewById(R.id.grid_view_header_row_cell_tv);
+            mAscTextView = (TextView) view.findViewById(R.id.grid_view_header_row_cell_asc_tv);
+            mDescTextView = (TextView) view.findViewById(R.id.grid_view_header_row_cell_desc_tv);
+//            mAscImage = (ImageView) view.findViewById(R.id.sort_asc_img);
+//            mDescImage = (ImageView) view.findViewById(R.id.sort_desc_img);
         }
     }
 
@@ -175,6 +185,8 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
     private MotionEvent mCurrentDownEvent;
     private MotionEvent mPreviousUpEvent;
 
+
+
     private boolean isConsideredDoubleTap(MotionEvent firstDown,
                                           MotionEvent firstUp, MotionEvent secondDown) {
         if (secondDown.getEventTime() - firstUp.getEventTime() > DOUBLE_TAP_TIMEOUT) {
@@ -191,7 +203,13 @@ public class GridViewHeaderRowAdapter extends RecyclerView.Adapter<GridViewHeade
          * All row will be filled by this listener.
          * @param sender Current object.
          * @param v The view whose state has changed.
+         * @param position The data of set number.
+         * @param positionOffset The column of offset.
          */
-        void onFirstRowDoubleClicked(Object sender, View v);
+        void onFirstRowDoubleClicked(Object sender, View v, int position, int positionOffset);
+
+        void onDataSort(Object sender, View v, int position, int positionOffset, GridViewBeanComparator.ORDER_TYPE orderType);
     }
+
+
 }

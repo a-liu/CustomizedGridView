@@ -12,6 +12,10 @@ import android.widget.HorizontalScrollView;
  */
 
 public class HScrollView extends HorizontalScrollView {
+    private float mSpeedRate = 0.25F;
+    public void setSpeedRate(float rate){
+        mSpeedRate = rate;
+    }
     private ScrollViewListener mScrollViewListener;
     public ScrollViewListener getScrollViewListener() {
         return mScrollViewListener;
@@ -21,6 +25,15 @@ public class HScrollView extends HorizontalScrollView {
         this.mScrollViewListener = scrollViewListener;
     }
 
+    private boolean mToucheEnabled = true;
+
+    public boolean getToucheEnabled() {
+        return mToucheEnabled;
+    }
+
+    public void setToucheEnabled(boolean toucheEnabled) {
+        this.mToucheEnabled = toucheEnabled;
+    }
 
     public HScrollView(Context context) {
         super(context);
@@ -37,6 +50,23 @@ public class HScrollView extends HorizontalScrollView {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HScrollView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    @Override
+    public void fling(int velocityX) {
+        int speed = (int)(velocityX * mSpeedRate);
+        super.fling(speed);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mToucheEnabled)
+        {
+            return super.onInterceptTouchEvent(ev);
+        }
+        else {
+            return mToucheEnabled;
+        }
     }
 
     @Override

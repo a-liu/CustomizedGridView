@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.liu.customizedgridview.R;
@@ -36,9 +37,11 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
 //    private int mGridViewCellFontSize = 16;
     private int mInitColumnCount;
     private List<GridViewRowBean> mHeaders;
+    private int mFixColumnCount;
     public GridViewHeaderListAdapter(Activity context,
                                    List<GridViewRowBean> headers,
                                    List<GridViewRowBean> rows,
+                                     int fixColumnCount,
                                      boolean wrapRowFlag,
                                      int totalColumnSpan,
                                    int initColumnCount,
@@ -48,6 +51,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mContext = context;
         this.mHeaders = headers;
         this.mRowDatas = rows;
+        this.mFixColumnCount = fixColumnCount;
         this.mWrapRowFlag = wrapRowFlag;
         this.mInitColumnCount = initColumnCount;
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.COLUMN;
@@ -63,6 +67,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
     public GridViewHeaderListAdapter(Activity context,
                                    List<GridViewRowBean> headers,
                                    List<GridViewRowBean> rows,
+                                     int fixColumnCount,
                                      boolean wrapRowFlag,
                                      int totalColumnSpan,
                                    boolean allRowDisplay,
@@ -72,6 +77,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mContext = context;
         this.mHeaders = headers;
         this.mRowDatas = rows;
+        this.mFixColumnCount = fixColumnCount;
         this.mWrapRowFlag = wrapRowFlag;
         this.mAllRowDisplayFlag = allRowDisplay;
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.ROW;
@@ -137,11 +143,6 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
                 int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
                 viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
             }
-
-//            viewHolder.rowBlank.setWidth((int)(
-//                    (float)(96 * (mGridViewCellFontSize+8)/72) *
-//                            rowNumberTextLength)
-//            );
             GridLayoutManager layoutManage = new GridLayoutManager(mContext, mTotalColumnSpan);
             layoutManage.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
@@ -155,16 +156,28 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
             GridViewHeaderRowAdapter gridViewAdapter = null;
             if (mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
             {
-                gridViewAdapter = new GridViewHeaderRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), mRowDatas.get(0).getColumnCells(), mWrapRowFlag, mAllRowDisplayFlag, this.mShortTextFlag);
+                gridViewAdapter = new GridViewHeaderRowAdapter(mContext, mTotalColumnSpan, mFixColumnCount, mHeaders.get(0).getColumnCells(), mRowDatas.get(0).getColumnCells(), mWrapRowFlag, mAllRowDisplayFlag, this.mShortTextFlag);
             }
             else
             {
-                gridViewAdapter = new GridViewHeaderRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), mRowDatas.get(0).getColumnCells(), mWrapRowFlag, mInitColumnCount, this.mShortTextFlag);
+                gridViewAdapter = new GridViewHeaderRowAdapter(mContext, mTotalColumnSpan, mFixColumnCount,  mHeaders.get(0).getColumnCells(), mRowDatas.get(0).getColumnCells(), mWrapRowFlag, mInitColumnCount, this.mShortTextFlag);
             }
             gridViewAdapter.setOnGridViewRowCellActionListener(new GridViewHeaderRowAdapter.OnGridViewRowCellActionListener() {
                 @Override
-                public void onFirstRowDoubleClicked(Object sender, View v) {
-//                    viewHolder.rowData.setAdapter((GridViewHeaderRowAdapter)sender);
+                public void onFirstRowDoubleClicked(Object sender, View v, int position, int positionOffset) {
+                    Toast.makeText(mContext, "position" + position + ":"+
+                                    "offset" + positionOffset + ":"+((TextView)v).getText(),
+                            Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onDataSort(Object sender, View v, int position, int positionOffset, GridViewBeanComparator.ORDER_TYPE orderType) {
+                    // 排序
+                    if (mOnGridViewDataSortListener != null)
+                    {
+                        mOnGridViewDataSortListener.onDataSort(position, positionOffset, orderType);
+                    }
+
                 }
             });
             viewHolder.rowData.setAdapter(gridViewAdapter);
@@ -172,7 +185,19 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
 
         return convertView;
     }
+    private OnGridViewDataSortListener mOnGridViewDataSortListener;
 
+    public OnGridViewDataSortListener getOnGridViewDataSortListener() {
+        return mOnGridViewDataSortListener;
+    }
+
+    public void setOnGridViewDataSortListener(OnGridViewDataSortListener listener) {
+        this.mOnGridViewDataSortListener = listener;
+    }
+
+    public interface OnGridViewDataSortListener {
+        void onDataSort(int position, int offset, GridViewBeanComparator.ORDER_TYPE orderType);
+    }
     /**
      * Account ViewHolderItem to get smooth scrolling.
      */

@@ -5,9 +5,11 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.HorizontalScrollView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 /**
  * Created by liu.jianfei on 2017/12/18.
@@ -23,6 +25,10 @@ public class VListView extends ListView {
         this.mListViewListener = listViewListener;
     }
 
+    private AjustHeightListener mAjustHeightListener;
+    public void setAjustHeightListener(AjustHeightListener listener) {
+        this.mAjustHeightListener = listener;
+    }
     private boolean mTouchEnable = true;
     public boolean GetTouchEnable() {
         return mTouchEnable;
@@ -33,21 +39,120 @@ public class VListView extends ListView {
 
     public VListView(Context context) {
         super(context);
+        this.setScrollListener();
     }
 
     public VListView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.setScrollListener();
     }
 
     public VListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.setScrollListener();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public VListView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        this.setScrollListener();
     }
 
+    @Override
+    public void fling(int velocityY) {
+        super.fling(velocityY / 4);
+    }
+
+    @Override
+    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+        super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
+    }
+
+    private void setScrollListener()
+    {
+        this.setOnScrollListener(new OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == SCROLL_STATE_IDLE ||
+                        scrollState == SCROLL_STATE_TOUCH_SCROLL  )
+                {
+                    View subView = view.getChildAt(0);
+                    if (subView != null)
+                    {
+                        int top = subView.getTop();
+                        if (mListViewListener != null)
+                        {
+                            mListViewListener.onScrollPositionFromTop(VListView.this, view.getFirstVisiblePosition(), top);
+                        }
+                    }
+                }
+
+                switch (scrollState) {
+                    // 当不滚动时
+                    case OnScrollListener.SCROLL_STATE_IDLE:
+                        // 判断滚动到底部
+                        if (view.getLastVisiblePosition() >= (view.getCount() - 1)) {
+                            if (mListViewListener != null)
+                            {
+                                mListViewListener.onScrollOver(VListView.this, SCROLL_DIRECTION.DOWN);
+                            }
+                        }
+                        // 判断滚动到顶部
+                        if (view.getLastVisiblePosition() <= 0) {
+                            if (mListViewListener != null)
+                            {
+                                mListViewListener.onScrollOver(VListView.this,SCROLL_DIRECTION.UP);
+                            }
+                        }
+                        break;
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                View subView = view.getChildAt(0);
+                if (subView != null)
+                {
+                    int top = subView.getTop();
+                    mListViewListener.onScrollPositionFromTop(VListView.this, firstVisibleItem, top);
+
+                    //判断顶部底部
+                    if (firstVisibleItem == 0) {
+                        View firstVisibleItemView = view.getChildAt(0);
+                        if (firstVisibleItemView != null && firstVisibleItemView.getTop() == 0) {
+                            if (mListViewListener != null)
+                            {
+                                mListViewListener.onScrollOver(VListView.this,SCROLL_DIRECTION.UP);
+                            }
+                        }
+                    } else if ((firstVisibleItem + visibleItemCount) == totalItemCount) {
+                        View lastVisibleItemView = view.getChildAt(view.getChildCount() - 1);
+                        if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == view.getHeight()) {
+                            if (mListViewListener != null)
+                            {
+                                mListViewListener.onScrollOver(VListView.this, SCROLL_DIRECTION.DOWN);
+                            }
+                        }
+                    }
+
+//                    // 判断滚动到底部
+//                    if (visibleItemCount >= totalItemCount) {
+//                        if (mListViewListener != null)
+//                        {
+//                            mListViewListener.onScrollOver(VListView.this, SCROLL_DIRECTION.DOWN);
+//                        }
+//                    }
+//                    // 判断滚动到顶部
+//                    if (firstVisibleItem <= 0) {
+//                        if (mListViewListener != null)
+//                        {
+//                            mListViewListener.onScrollOver(VListView.this,SCROLL_DIRECTION.UP);
+//                        }
+//                    }
+                }
+            }
+        });
+    }
 //    @Override
 //    public boolean onInterceptTouchEvent(MotionEvent ev) {
 ////        super.onInterceptTouchEvent(ev)
@@ -64,10 +169,16 @@ public class VListView extends ListView {
             mListViewListener.onScrollChanged(this, l, t, oldL, oldT);
         }
     }
-
+    public interface AjustHeightListener{
+        void ajustHeight(int height);
+    }
     public interface ListViewListener{
         void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT);
+        void onScrollPositionFromTop(ListView scrollView, int position, int top);
+        void onScrollOver(ListView scrollView, SCROLL_DIRECTION direction);
     }
-
-    //    public void on
+    public enum SCROLL_DIRECTION{
+        UP,
+        DOWN,
+    }
 }

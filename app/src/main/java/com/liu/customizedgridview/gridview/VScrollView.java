@@ -12,6 +12,10 @@ import android.widget.ScrollView;
  */
 
 public class VScrollView extends ScrollView {
+    private float mSpeedRate = 0.25F;
+    public void setSpeedRate(float rate){
+        mSpeedRate = rate;
+    }
     private ScrollViewListener mScrollViewListener;
     public ScrollViewListener getScrollViewListener() {
         return mScrollViewListener;
@@ -47,8 +51,13 @@ public class VScrollView extends ScrollView {
          {
              mScrollViewListener.onScrollChanged(this, x, y, oldX, oldY);
          }
-
      }
+
+    @Override
+    public void fling(int velocityY) {
+        int speed = (int)(velocityY * mSpeedRate);
+        super.fling(speed);
+    }
 
     public interface ScrollViewListener {
         void onScrollChanged(ScrollView scrollView, int x, int y, int oldX, int oldY);

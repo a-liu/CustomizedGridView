@@ -47,6 +47,7 @@ android:orientation="vertical">
             android:orientation="horizontal"
             android:divider="@drawable/grid_view_content_text_bg"
             android:visibility="visible"
+            android:focusableInTouchMode="true"
             >
                 <com.liu.customizedgridview.gridview.VScrollView
                     android:id="@+id/grid_view_data_left_v_scroll"
@@ -83,15 +84,16 @@ android:orientation="vertical">
                                 android:id="@+id/grid_view_data_right_h_scroll"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:focusableInTouchMode="true"
                                 android:layout_margin="0dp"
                                 android:scrollbars="none"
                                 >
-                        <com.liu.customizedgridview.gridview.VListView
-                            android:id="@+id/grid_view_data_right_rows"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:dividerHeight="0dip">
-                        </com.liu.customizedgridview.gridview.VListView>
+                                <com.liu.customizedgridview.gridview.VListView
+                                    android:id="@+id/grid_view_data_right_rows"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:dividerHeight="0dip">
+                                </com.liu.customizedgridview.gridview.VListView>
 
                         </com.liu.customizedgridview.gridview.HScrollView>
                 </com.liu.customizedgridview.gridview.VScrollView>

@@ -22,6 +22,8 @@ import com.liu.customizedgridview.utils.DisplayUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
 
@@ -43,6 +45,10 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
     private int mTotalColumnSpan;
     private int mInitColumnCount;
     private List<GridViewRowBean> mHeaders;
+    public void setDataRows(List<GridViewRowBean> rows)
+    {
+        this.mRowDatas = rows;
+    }
     public GridViewDataListAdapter(Activity context,
                                    List<GridViewRowBean> headers,
                                    List<GridViewRowBean> rows,
@@ -134,66 +140,6 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                 viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
             }
 
-
-//            viewHolder.rowData.setOnTouchListener(new View.OnTouchListener() {
-//
-//                @Override
-//                public boolean onTouch(View view, MotionEvent motionEvent) {
-//                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-//                    {
-//                            Toast.makeText(mContext, "ACTION_DOWN" + motionEvent.getX(),
-//                                    Toast.LENGTH_SHORT).show();
-//                    } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-//                    Toast.makeText(mContext, "ACTION_MOVE" + motionEvent.getX(),
-//                            Toast.LENGTH_SHORT).show();
-//                    } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-//                        Toast.makeText(mContext, "ACTION_UP" + motionEvent.getX(),
-//                                Toast.LENGTH_SHORT).show();
-//                    }
-//                        else {
-//                        return false;
-//                    }
-//
-//
-//                    return true;
-//                }
-//            });
-//            viewHolder.expand.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Toast.makeText(mContext, "Expand",
-//                            Toast.LENGTH_SHORT).show();
-//                    GridViewRowBean rowItem = mRowDatas.get(position);
-//                    viewHolder.expand.setVisibility(View.GONE);
-//                    viewHolder.collapse.setVisibility(View.VISIBLE);
-//                    GridViewDataRowAdapter gridViewAdapter = null;
-//                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, rowItem.getColumnCells(), rowItem.getColumnCells().size(), mShortTextFlag);
-//                    viewHolder.rowData.setAdapter(gridViewAdapter);
-//                }
-//            });
-//
-//            viewHolder.collapse.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Toast.makeText(mContext, "Collapse",
-//                            Toast.LENGTH_SHORT).show();
-//                    GridViewRowBean rowItem = mRowDatas.get(position);
-//                    viewHolder.collapse.setVisibility(View.GONE);
-//                    viewHolder.expand.setVisibility(View.VISIBLE);
-//                    GridViewDataRowAdapter gridViewAdapter = null;
-//                    if (mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
-//                    {
-//                        gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, rowItem.getColumnCells(), mAllRowExpandFlag, mShortTextFlag);
-//                    }
-//                    else
-//                    {
-//                        gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, rowItem.getColumnCells(), mInitColumnCount, mShortTextFlag);
-//                    }
-//
-//                    viewHolder.rowData.setAdapter(gridViewAdapter);
-//                }
-//            });
-
             GridLayoutManager layoutManage = new GridLayoutManager(mContext, mTotalColumnSpan);
             layoutManage.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
@@ -204,22 +150,38 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                 }
             });
             viewHolder.rowData.setLayoutManager(layoutManage);
-            GridViewDataRowAdapter gridViewAdapter = null;
-            if (mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
+            GridViewDataRowAdapter gridViewAdapter = (GridViewDataRowAdapter)viewHolder.rowData.getAdapter();
+            if (gridViewAdapter != null)
             {
-                gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mAllRowExpandFlag, this.mShortTextFlag);
+                final GridViewDataRowAdapter adapter = gridViewAdapter;
+                adapter.setColumnDatas(rowItem.getColumnCells());
+                android.os.Handler handler = new android.os.Handler();
+                handler.post(new Runnable(){
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
             else
             {
-                gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mInitColumnCount, this.mShortTextFlag);
-            }
-            gridViewAdapter.setOnGridViewRowCellActionListener(new GridViewDataRowAdapter.OnGridViewRowCellActionListener() {
-                @Override
-                public void onFirstRowDoubleClicked(Object sender, View v) {
-                    viewHolder.rowData.setAdapter((GridViewDataRowAdapter)sender);
+                if (mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
+                {
+                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mAllRowExpandFlag, this.mShortTextFlag);
                 }
-            });
-            viewHolder.rowData.setAdapter(gridViewAdapter);
+                else
+                {
+                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mInitColumnCount, this.mShortTextFlag);
+                }
+                gridViewAdapter.setOnGridViewRowCellActionListener(new GridViewDataRowAdapter.OnGridViewRowCellActionListener() {
+                    @Override
+                    public void onFirstRowDoubleClicked(Object sender, View v) {
+                        viewHolder.rowData.setAdapter((GridViewDataRowAdapter)sender);
+                    }
+                });
+                viewHolder.rowData.setAdapter(gridViewAdapter);
+            }
+
         }
 
         return convertView;

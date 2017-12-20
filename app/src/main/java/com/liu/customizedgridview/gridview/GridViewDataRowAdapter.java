@@ -3,7 +3,6 @@ package com.liu.customizedgridview.gridview;
 import android.app.Activity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,15 +16,12 @@ import android.widget.Toast;
 import com.liu.customizedgridview.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRowAdapter.ViewHolder> {
     private GridViewDataListAdapter.DISPLAY_ROW_MEMBER mDisplayFlag;
-    private List<GridViewCellBean> cellList;
-
+    private List<GridViewCellBean> mDatas;
     private boolean isSelected = false;
 
     private List<GridViewCellBean> selectList;
@@ -44,8 +40,12 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     {
         mOnGridViewRowCellActionListener = listener;
     }
+    public void setColumnDatas(List<GridViewCellBean> datas)
+    {
+        this.mDatas = datas;
+    }
     public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
-        this.cellList = cellList;
+        this.mDatas = cellList;
         this.mHeaders = headers;
         this.mContext = context;
         this.mWrapRowFlag = wrapRowFlag;
@@ -57,7 +57,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
     }
     public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowExpandFlag, boolean shortText) {
-        this.cellList = cellList;
+        this.mDatas = cellList;
         this.mHeaders = headers;
         this.mContext = context;
         this.mWrapRowFlag = wrapRowFlag;
@@ -150,15 +150,15 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     public void onBindViewHolder(final GridViewDataRowAdapter.ViewHolder holder, final int position) {
         if (this.mShortTextFlag)
         {
-            holder.mTextView.setText(cellList.get(position).getShortText());
+            holder.mTextView.setText(mDatas.get(position).getShortText());
         }
         else{
-            holder.mTextView.setText(cellList.get(position).getText());
+            holder.mTextView.setText(mDatas.get(position).getText());
         }
-        holder.itemView.setTag(cellList.get(position));
-        holder.mTextView.setGravity(cellList.get(position).getGravity());
+        holder.itemView.setTag(mDatas.get(position));
+        holder.mTextView.setGravity(mDatas.get(position).getGravity());
 
-        if (cellList.get(position).getColNumber() < mFirstRowColumnCount)
+        if (mDatas.get(position).getColNumber() < mFirstRowColumnCount)
         {
             holder.mHeaderView.setText("");
             holder.mHeaderView.setVisibility(View.GONE);
@@ -174,9 +174,9 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
                                 mPreviousUpEvent, event)) {
 //                            Toast.makeText(mContext, "double clicked.",
 //                                    Toast.LENGTH_SHORT).show();
-                            if (mDisplayColumnCount < cellList.size())
+                            if (mDisplayColumnCount < mDatas.size())
                             {
-                                mDisplayColumnCount = cellList.size();
+                                mDisplayColumnCount = mDatas.size();
                             }
                             else
                             {
@@ -265,7 +265,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
             holder.mTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(mContext, cellList.get(position).getText(),
+                    Toast.makeText(mContext, mDatas.get(position).getText(),
                             Toast.LENGTH_SHORT).show();
 
                 }
@@ -277,7 +277,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
 
     @Override
     public int getItemCount() {
-//        return cellList.size();
+//        return mDatas.size();
         return mDisplayColumnCount;
     }
     private boolean isLongPressed(float lastX,float lastY,

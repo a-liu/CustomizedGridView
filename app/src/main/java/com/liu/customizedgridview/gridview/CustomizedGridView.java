@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +16,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.liu.customizedgridview.R;
 import com.liu.customizedgridview.utils.DisplayUtils;
@@ -23,6 +24,8 @@ import com.liu.customizedgridview.utils.DisplayUtils;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,15 +38,18 @@ public final class CustomizedGridView {
      */
     public static final int CELL_BLANK_LENGTH = 0;
     public static final int CELL_FONT_SIZE = 16;
-    public static final int ROW_HEIGHT = 93;
+    public static final int DATA_ROW_HEIGHT = 93;
+    public static final int HEADER_ROW_HEIGHT = 150;
     //region private Fields
     private CustomizedGridViewLayout mGridViewLayout;
-    private CustomizedGridView mCustomizedGridView;
 
     private ListView mHeaderListLeft;
     private ListView mHeaderListRight;
     private VListView mDataListLeft;
     private VListView mDataListRight;
+    private GridViewDataListAdapter mGridViewDataRightAdapter;
+    private GridViewDataListAdapter mGridViewDataLeftAdapter;
+
     private HScrollView mRightHeaderHScroll;
     private HScrollView mRightDataHScroll;
     private VScrollView mLeftDataVScroll;
@@ -98,6 +104,7 @@ public final class CustomizedGridView {
         int width = 0;
         this.prevSetting();
 
+
         mGridViewLayout = (CustomizedGridViewLayout) mRootView.findViewById(mViewId);
         mGridViewLayout.setGridView(this);
         // 左抬头
@@ -111,6 +118,7 @@ public final class CustomizedGridView {
                             mContext,
                             mLeftHeaders,
                             mLeftRowDatas,
+                            0,
                             mWrapRowFlag,
                             mLeftHeaderTotalColumnSpan,
                             mAllRowExpandFlag,
@@ -129,19 +137,61 @@ public final class CustomizedGridView {
                         mContext,
                         mRightHeaders,
                         mRightRowDatas,
+                        mfixColumnCount,
                         mWrapRowFlag,
                         mRightHeaderTotalColumnSpan,
                         mAllRowExpandFlag,
                         mShortTextFlag, null);
-        mHeaderListRight.setAdapter(gridViewHeaderRightAdapter);
+        gridViewHeaderRightAdapter.setOnGridViewDataSortListener(new GridViewHeaderListAdapter.OnGridViewDataSortListener()
+        {
+            @Override
+            public void onDataSort(int position, int offset, GridViewBeanComparator.ORDER_TYPE orderType) {
+                // 数据排序
+                Collections.sort(mRowDatas, new GridViewBeanComparator(true, position+offset, orderType));
 
+                // 行号设定
+                resetFixRowNumbers();
+
+                // 数据重新分割
+                fixColumnSetting();
+                mGridViewDataRightAdapter.setDataRows(mRightRowDatas);
+                final GridViewDataListAdapter rightAdapter = mGridViewDataRightAdapter;
+                Handler rightHandler= new Handler();
+                rightHandler.post(new Runnable(){
+                    @Override
+                    public void run() {
+                        rightAdapter.notifyDataSetChanged();
+                    }
+                });
+                if (!mWrapRowFlag)
+                {
+                    mGridViewDataLeftAdapter.setDataRows(mLeftRowDatas);
+                    final GridViewDataListAdapter leftAdapter = mGridViewDataLeftAdapter;
+
+                    Handler leftHandler= new Handler();
+                    leftHandler.post(new Runnable(){
+                        @Override
+                        public void run() {
+                            leftAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        });
+        mHeaderListRight.setAdapter(gridViewHeaderRightAdapter);
         // 左数据
         mDataListLeft = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_left_rows);
-        if (mLeftRowDatas != null)
+        if (!mWrapRowFlag)
         {
-            height = (int)(mLeftRowDatas.size() * CustomizedGridView.ROW_HEIGHT);
-            mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-            GridViewDataListAdapter gridViewDataLeftAdapter = new GridViewDataListAdapter(this.mContext,
+            // 整行显示时，全部加载
+//            height = (int)(mLeftRowDatas.size() * CustomizedGridView.DATA_ROW_HEIGHT);
+//            mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+
+            // 逐行加载
+            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
+            mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parentHeight - HEADER_ROW_HEIGHT));
+
+            mGridViewDataLeftAdapter = new GridViewDataListAdapter(this.mContext,
                     mLeftHeaders,
                     mLeftRowDatas,
                     this.mWrapRowFlag,
@@ -149,7 +199,28 @@ public final class CustomizedGridView {
                     this.mAllRowExpandFlag,
                     this.mShortTextFlag,
                     null);
-            mDataListLeft.setAdapter(gridViewDataLeftAdapter);
+            mDataListLeft.setAdapter(mGridViewDataLeftAdapter);
+            mDataListLeft.setListViewListener(new VListView.ListViewListener(){
+                @Override
+                public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
+
+                }
+
+                @Override
+                public void onScrollPositionFromTop(ListView scrollView, int position, int top) {
+                    if (mDataListRight != null){
+                        mDataListRight.smoothScrollToPositionFromTop(position, top);
+                    }
+                }
+
+                @Override
+                public void onScrollOver(ListView scrollView, VListView.SCROLL_DIRECTION direction) {
+                    Toast.makeText(mContext, "Over：" + direction,
+                            Toast.LENGTH_SHORT).show();
+                }
+
+
+            });
             //        mDataListLeft.setTouchEnable(false);
 //        mDataListLeft.setOnScrollListener(new AbsListView.OnScrollListener() {
 //            @Override
@@ -200,11 +271,23 @@ public final class CustomizedGridView {
 
         // 右数据
         mDataListRight = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_right_rows);
-        height = (int)(mRightRowDatas.size() * CustomizedGridView.ROW_HEIGHT);
-        mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        if (!mWrapRowFlag)
+        {
+            // 整行显示时，全部加载
+//            height = (int)(mRightRowDatas.size() * CustomizedGridView.DATA_ROW_HEIGHT);
+//            mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+//            // 逐行加载
+            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
+            mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parentHeight - HEADER_ROW_HEIGHT));
+        }
+        else {
+            // 满屏显示
+            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
+            mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parentHeight - HEADER_ROW_HEIGHT));
+        }
         if (mRightRowDatas != null)
         {
-            GridViewDataListAdapter gridViewDataRightAdapter = new GridViewDataListAdapter(this.mContext,
+            mGridViewDataRightAdapter = new GridViewDataListAdapter(this.mContext,
                     mRightHeaders,
                     mRightRowDatas,
                     this.mWrapRowFlag,
@@ -212,39 +295,29 @@ public final class CustomizedGridView {
                     this.mAllRowExpandFlag,
                     this.mShortTextFlag,
                     null);
-            mDataListRight.setAdapter(gridViewDataRightAdapter);
-            mDataListRight.setOnScrollListener(new AbsListView.OnScrollListener() {
+            mDataListRight.setAdapter(mGridViewDataRightAdapter);
+            mDataListRight.setListViewListener(new VListView.ListViewListener() {
                 @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    if (mDataListLeft != null &&
-                            scrollState == SCROLL_STATE_IDLE ||
-                            scrollState == SCROLL_STATE_TOUCH_SCROLL  )
-                    {
-                        View subView = view.getChildAt(0);
-                        if (subView != null)
-                        {
-                            int top = subView.getTop();
-                            mDataListLeft.smoothScrollToPositionFromTop(view.getFirstVisiblePosition(), top);
-                        }
+                public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
+
+                }
+
+                @Override
+                public void onScrollPositionFromTop(ListView scrollView, int position, int top) {
+                    if (mDataListLeft != null){
+                        mDataListLeft.smoothScrollToPositionFromTop(position, top);
                     }
                 }
 
                 @Override
-                public void onScroll(AbsListView view, int firstVisibleItem,
-                                     int visibleItemCount, int totalItemCount) {
-                    if (mDataListLeft != null)
-                    {
-                        View subView = view.getChildAt(0);
-                        if (subView != null)
-                        {
-                            int top = subView.getTop();
-                            mDataListLeft.smoothScrollToPositionFromTop(firstVisibleItem, top);
-                        }
-                    }
+                public void onScrollOver(ListView scrollView, VListView.SCROLL_DIRECTION direction) {
+                    Toast.makeText(mContext, "Over：" + direction,
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
+        // 滚动条
         if (!mWrapRowFlag)
         {
             mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
@@ -276,9 +349,9 @@ public final class CustomizedGridView {
             mRightDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_v_scroll);
             mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
             // 设定高度、宽度
-//        height = (int)(mLeftRowDatas.size() * CustomizedGridView.ROW_HEIGHT);
             width = (int)(mLeftDataTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
             mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
+
 
             VScrollView.ScrollViewListener leftDataVScrollListener = new VScrollView.ScrollViewListener() {
                 @Override
@@ -306,17 +379,36 @@ public final class CustomizedGridView {
         {
             mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
             mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
+
+            mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
+            mRightHeaderHScroll.setToucheEnabled(false);
+            mRightDataHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_h_scroll);
+            mRightDataHScroll.setToucheEnabled(false);
         }
 
 
 
     }
 
+//    public int px2dp(int px) {
+//        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+//        int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+//        return dp;
+//    }
+//    public int dp2px(int dp) {
+//        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+//                mContext.getResources().getDisplayMetrics());
+//    }
 
-    public int dp2px(int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-                mContext.getResources().getDisplayMetrics());
+    private void resetFixRowNumbers()
+    {
+        for (int i=0; i< this.mRowDatas.size(); i++)
+        {
+            String value = String.valueOf(i + 1);
+            this.mRowDatas.get(i).getColumnCells().get(0).setValue(value);
+        }
     }
+
     private void addFixRowNumbers()
     {
         if (mfixColumnCount <= 0 || this.mWrapRowFlag)
@@ -639,6 +731,13 @@ public final class CustomizedGridView {
         }
     }
 
+    public void setOnLoadCompleteListener(CustomizedGridViewLayout.OnLoadCompleteListener listener)
+    {
+        if (this.mGridViewLayout != null)
+        {
+            mGridViewLayout.setOnLoadCompleteListener(listener);
+        }
+    }
     public static class Builder {
         private Activity mContext;
         private View mRootView;

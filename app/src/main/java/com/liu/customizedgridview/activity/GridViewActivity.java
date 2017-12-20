@@ -2,10 +2,13 @@ package com.liu.customizedgridview.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 
 import com.liu.customizedgridview.R;
 import com.liu.customizedgridview.gridview.CustomizedGridView;
+import com.liu.customizedgridview.gridview.CustomizedGridViewLayout;
 import com.liu.customizedgridview.gridview.GridViewCellBean;
 import com.liu.customizedgridview.gridview.GridViewRowBean;
 
@@ -80,13 +83,20 @@ public class GridViewActivity extends AppCompatActivity {
             rowDatas.add(rowBean);
         }
         try {
-            new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
+            Log.d("CustomizedGridView", "loadStart..............");
+            CustomizedGridView view = new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
                     .wrapRowFlag(false)
                     .fixColumnCount(2)
                     .build();
+            view.setOnLoadCompleteListener(new CustomizedGridViewLayout.OnLoadCompleteListener(){
+                @Override
+                public void onLoadComplete(View view) {
+                    Log.d("CustomizedGridView", "loadComplete..............");
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
