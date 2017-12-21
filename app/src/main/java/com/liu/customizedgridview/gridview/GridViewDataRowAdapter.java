@@ -36,6 +36,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     private float xDown,yDown, xUp;
     private boolean isLongClickModule = false;
     private boolean isLongClicking = false;
+    private int mFixColumnCount;
     public void setOnGridViewRowCellActionListener(OnGridViewRowCellActionListener listener)
     {
         mOnGridViewRowCellActionListener = listener;
@@ -44,10 +45,11 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     {
         this.mDatas = datas;
     }
-    public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
+    public GridViewDataRowAdapter(Activity context, int totalSpan, int fixColumnCount, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
         this.mDatas = cellList;
         this.mHeaders = headers;
         this.mContext = context;
+        this.mFixColumnCount = fixColumnCount;
         this.mWrapRowFlag = wrapRowFlag;
         this.mDisplayColumnCount = initColumnCount;
         selectList = new ArrayList<>();
@@ -56,8 +58,9 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
     }
-    public GridViewDataRowAdapter(Activity context, int totalSpan, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowExpandFlag, boolean shortText) {
+    public GridViewDataRowAdapter(Activity context, int totalSpan,  int fixColumnCount, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowExpandFlag, boolean shortText) {
         this.mDatas = cellList;
+        this.mFixColumnCount = fixColumnCount;
         this.mHeaders = headers;
         this.mContext = context;
         this.mWrapRowFlag = wrapRowFlag;

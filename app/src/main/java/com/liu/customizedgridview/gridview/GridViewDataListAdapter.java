@@ -35,7 +35,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
     private List<GridViewRowBean> mRowDatas;
     private GridViewRowBean mCurrentRow;
     private Activity mContext = null;
-
+    private int mFixColumnCount;
 
 //    private GridViewDataListAdapter.GridViewListAdapterListener mListener;
     private Drawable mTintedCheck;
@@ -52,6 +52,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
     public GridViewDataListAdapter(Activity context,
                                    List<GridViewRowBean> headers,
                                    List<GridViewRowBean> rows,
+                                   int fixColumnCount,
                                    int initColumnCount,
                                    boolean wrapRowFlag,
                                    int totalColumnSpan,
@@ -61,6 +62,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mContext = context;
         this.mHeaders = headers;
         this.mRowDatas = rows;
+        this.mFixColumnCount = fixColumnCount;
         this.mInitColumnCount = initColumnCount;
         this.mWrapRowFlag = wrapRowFlag;
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.COLUMN;
@@ -74,6 +76,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
     public GridViewDataListAdapter(Activity context,
                                    List<GridViewRowBean> headers,
                                    List<GridViewRowBean> rows,
+                                   int fixColumnCount,
                                    boolean wrapRowFlag,
                                    int totalColumnSpan,
                                    boolean allRowExpandFlag,
@@ -85,13 +88,13 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mRowDatas = rows;
         this.mWrapRowFlag = wrapRowFlag;
         this.mAllRowExpandFlag = allRowExpandFlag;
+        this.mFixColumnCount = fixColumnCount;
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.ROW;
         this.mTintedCheck = tintedCheck;
         this.mShortTextFlag = shortText;
         this.mTotalColumnSpan = totalColumnSpan;
 
     }
-
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final GridViewCellItemViewHolder viewHolder;
@@ -110,6 +113,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
 
 
         GridViewRowBean rowItem = mRowDatas.get(position);
+        GridLayoutManager layoutManage = null;
         if (rowItem != null) {
 
             /// bind listener
@@ -132,15 +136,27 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
                 );
                 int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
                 viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+                layoutManage = new GridLayoutManager(mContext, mTotalColumnSpan);
             }
             else
             {
                 viewHolder.rowNumber.setVisibility(View.GONE);
+//                if (mFixColumnCount == 0)
+//                {
+                // 全部显示
                 int width = (int)(mTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
                 viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+                layoutManage = new GridLayoutManager(mContext, mTotalColumnSpan);
+//                }
+//                else {
+//                    // 逐屏显示
+//                    int width = (int)(DisplayUtils.getDisplayWidth(mContext));
+//                    viewHolder.rowData.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
+//                    layoutManage = new GridLayoutManager(mContext, mTotalColumnSpan);
+//                }
             }
 
-            GridLayoutManager layoutManage = new GridLayoutManager(mContext, mTotalColumnSpan);
+
             layoutManage.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
@@ -167,11 +183,11 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
             {
                 if (mDisplayFlag == DISPLAY_ROW_MEMBER.ROW)
                 {
-                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mAllRowExpandFlag, this.mShortTextFlag);
+                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mFixColumnCount, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mAllRowExpandFlag, this.mShortTextFlag);
                 }
                 else
                 {
-                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mInitColumnCount, this.mShortTextFlag);
+                    gridViewAdapter = new GridViewDataRowAdapter(mContext, mTotalColumnSpan, mFixColumnCount, mHeaders.get(0).getColumnCells(), rowItem.getColumnCells(), mWrapRowFlag, mInitColumnCount, this.mShortTextFlag);
                 }
                 gridViewAdapter.setOnGridViewRowCellActionListener(new GridViewDataRowAdapter.OnGridViewRowCellActionListener() {
                     @Override

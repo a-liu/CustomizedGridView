@@ -25,9 +25,9 @@ public class VListView extends ListView {
         this.mListViewListener = listViewListener;
     }
 
-    private AjustHeightListener mAjustHeightListener;
-    public void setAjustHeightListener(AjustHeightListener listener) {
-        this.mAjustHeightListener = listener;
+    private AdjustHeightListener mAdjustHeightListener;
+    public void setAdjustHeightListener(AdjustHeightListener listener) {
+        this.mAdjustHeightListener = listener;
     }
     private boolean mTouchEnable = true;
     public boolean GetTouchEnable() {
@@ -122,7 +122,7 @@ public class VListView extends ListView {
                         if (firstVisibleItemView != null && firstVisibleItemView.getTop() == 0) {
                             if (mListViewListener != null)
                             {
-                                mListViewListener.onScrollOver(VListView.this,SCROLL_DIRECTION.UP);
+//                                mListViewListener.onScrollOver(VListView.this,SCROLL_DIRECTION.UP);
                             }
                         }
                     } else if ((firstVisibleItem + visibleItemCount) == totalItemCount) {
@@ -130,7 +130,7 @@ public class VListView extends ListView {
                         if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == view.getHeight()) {
                             if (mListViewListener != null)
                             {
-                                mListViewListener.onScrollOver(VListView.this, SCROLL_DIRECTION.DOWN);
+//                                mListViewListener.onScrollOver(VListView.this, SCROLL_DIRECTION.DOWN);
                             }
                         }
                     }
@@ -160,6 +160,22 @@ public class VListView extends ListView {
 //
 //        return result;
 //    }
+//    @Override
+//    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//
+//        if ( getFirstVisiblePosition() == 0 &&
+//                getChildAt(0).getTop() == 0) {
+//            //到头部了
+//            getParent().requestDisallowInterceptTouchEvent(false);//放行
+//        } else {
+//            getParent().requestDisallowInterceptTouchEvent(true);//拦截
+//            if (mAdjustHeightListener != null)
+//            {
+//                this.mAdjustHeightListener.adjustHeight(93 * getChildCount());
+//            }
+//        }
+//        return super.onInterceptTouchEvent(ev);
+//    }
 
     @Override
     protected void onScrollChanged(int l, int t, int oldL, int oldT) {
@@ -169,8 +185,18 @@ public class VListView extends ListView {
             mListViewListener.onScrollChanged(this, l, t, oldL, oldT);
         }
     }
-    public interface AjustHeightListener{
-        void ajustHeight(int height);
+
+//    @Override
+//    public void onViewAdded(View child) {
+//        super.onViewAdded(child);
+//        if (mAdjustHeightListener != null)
+//        {
+//            this.mAdjustHeightListener.adjustHeight(93);
+//        }
+//    }
+
+    public interface AdjustHeightListener{
+        void adjustHeight(int height);
     }
     public interface ListViewListener{
         void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT);
