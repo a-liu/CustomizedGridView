@@ -7,22 +7,23 @@ import android.view.Gravity;
 import android.view.View;
 
 import com.liu.customized.R;
-import com.liu.customized.gridview.CustomizedGridView;
-import com.liu.customized.gridview.CustomizedGridViewLayout;
-import com.liu.customized.gridview.GridViewCellBean;
-import com.liu.customized.gridview.GridViewRowBean;
+import com.liu.customized.table.CustomizedTableView;
+import com.liu.customized.table.CustomizedTableViewLayout;
+import com.liu.customized.table.TableViewCellBean;
+import com.liu.customized.table.TableViewRowBean;
+import com.liu.customized.table.CustomizedTableView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TableViewActivity extends AppCompatActivity {
-    private List<GridViewRowBean> rowHeaders = new ArrayList<>();
-    private List<GridViewRowBean> rowDatas = new ArrayList<>();
+    private List<TableViewRowBean> rowHeaders = new ArrayList<>();
+    private List<TableViewRowBean> rowDatas = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_grid);
+        setContentView(R.layout.activity_table);
         initData();
     }
 
@@ -44,16 +45,16 @@ public class TableViewActivity extends AppCompatActivity {
         };
         for (int i=0; i< 1; i++)
         {
-            GridViewRowBean rowBean = new GridViewRowBean();
+            TableViewRowBean rowBean = new TableViewRowBean();
             int rowIndex = i+1;
             rowBean.setId("row" + rowIndex);
             rowBean.setWrap(false);
             rowBean.setRowNumber(rowIndex);
-            List<GridViewCellBean> rowCells = new ArrayList<GridViewCellBean>();
+            List<TableViewCellBean> rowCells = new ArrayList<TableViewCellBean>();
             for(int j=0; j< headerValues.length; j++)
             {
                 int colIndex = j+1;
-                GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex,  headerValues[j]);
+                TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex,  headerValues[j]);
                 cellBean.setGravity(Gravity.CENTER);
                 rowCells.add(cellBean);
             }
@@ -62,20 +63,20 @@ public class TableViewActivity extends AppCompatActivity {
             rowHeaders.add(rowBean);
         }
 
-        for (int i=0; i< 20; i++)
+        for (int i=0; i< 50; i++)
         {
-            GridViewRowBean rowBean = new GridViewRowBean();
+            TableViewRowBean rowBean = new TableViewRowBean();
             int rowIndex = i+1;
             rowBean.setId("row" + rowIndex);
             rowBean.setWrap(false);
             rowBean.setRowNumber(rowIndex);
-            List<GridViewCellBean> rowCells = new ArrayList<GridViewCellBean>();
+            List<TableViewCellBean> rowCells = new ArrayList<TableViewCellBean>();
             for(int j=0; j< bodyValues.length; j++)
             {
                 int colIndex = j+1;
-                GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
+                TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
 //                TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex, String.format("%d%d:%s",rowIndex, colIndex, bodyValues[j]));
-                cellBean.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+                cellBean.setGravity(Gravity.LEFT | Gravity.FILL_VERTICAL);
                 rowCells.add(cellBean);
             }
 
@@ -83,18 +84,20 @@ public class TableViewActivity extends AppCompatActivity {
             rowDatas.add(rowBean);
         }
         try {
-            Log.d("CustomizedGridView", "loadStart..............");
-            CustomizedGridView view = new CustomizedGridView.Builder(this, R.id.customized_grid_view_layout)
+            Log.d("CustomizedTableView", "loadStart..............");
+            CustomizedTableView view = new CustomizedTableView.Builder(this, R.id.customized_table_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
                     .wrapRowFlag(false)
+                    .minFieldHeight(45)
+                    .maxFieldWidth(200)
                     .fixColumnCount(2)
                     .build();
-            view.setOnLoadCompleteListener(new CustomizedGridViewLayout.OnLoadCompleteListener(){
+            view.setOnLoadCompleteListener(new CustomizedTableViewLayout.OnLoadCompleteListener(){
                 @Override
                 public void onLoadComplete(View view) {
-                    Log.d("CustomizedGridView", "loadComplete..............");
+                    Log.d("CustomizedTableView", "loadComplete..............");
                 }
             });
         } catch (Exception e) {

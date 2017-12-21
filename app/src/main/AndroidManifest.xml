@@ -22,6 +22,7 @@
         </activity>
         <activity android:name=".activity.GridViewActivity" />
         <activity android:name=".activity.WrapGridViewActivity" />
+        <activity android:name=".activity.TableViewActivity" />
     </application>
 
 </manifest>

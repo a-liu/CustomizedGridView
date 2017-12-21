@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/customized_table_linear_layout"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/customized_table_layout_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:divider="@drawable/table_content_text_bg"
+            >
+                <LinearLayout
+                    android:id="@+id/customized_table_layout_left_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+                </LinearLayout>
+                <!--<ListView-->
+                    <!--android:id="@+id/table_header_left_rows"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:divider="@color/colorPrimaryDark"-->
+                    <!--android:dividerHeight="0dip"-->
+                    <!--&gt;-->
+                <!--</ListView>-->
+                <com.liu.customized.table.HScrollView
+                    android:id="@+id/table_header_right_h_scroll"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="0dp"
+                    android:scrollbars="none"
+                    >
+                        <LinearLayout
+                            android:id="@+id/customized_table_layout_right_header"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            >
+                        </LinearLayout>
+                        <!--<ListView-->
+                            <!--android:id="@+id/table_header_right_rows"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_weight="1"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:divider="@color/colorPrimaryDark"-->
+                            <!--android:dividerHeight="0dip">-->
+                        <!--</ListView>-->
+                </com.liu.customized.table.HScrollView>
+        </LinearLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/customized_table_layout_body"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </android.support.v7.widget.RecyclerView>
+        <!--<LinearLayout-->
+            <!--android:id="@+id/customized_table_layout_body"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="0dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_margin="0dp"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:divider="@drawable/table_content_text_bg"-->
+            <!--android:visibility="visible"-->
+            <!--android:focusableInTouchMode="true"-->
+            <!--&gt;-->
+                <!--<com.liu.customized.gridview.VScrollView-->
+                    <!--android:id="@+id/table_data_left_v_scroll"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_margin="0dp"-->
+                    <!--android:scrollbars="none"-->
+                    <!--&gt;-->
+                        <!--<com.liu.customized.gridview.HScrollView-->
+                            <!--android:id="@+id/table_data_left_h_scroll"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="match_parent"-->
+                            <!--android:layout_margin="0dp"-->
+                            <!--android:scrollbars="none"-->
+                            <!--&gt;-->
+                                <!--<com.liu.customized.gridview.VListView-->
+                                    <!--android:id="@+id/table_data_left_rows"-->
+                                    <!--android:layout_width="match_parent"-->
+                                    <!--android:layout_height="match_parent"-->
+                                    <!--android:scrollbars="none"-->
+                                    <!--android:scrollingCache="false"-->
+                                    <!--android:animationCache="false"-->
+                                    <!--android:dividerHeight="0dip">-->
+                                <!--</com.liu.customized.gridview.VListView>-->
+                        <!--</com.liu.customized.gridview.HScrollView>-->
+                <!--</com.liu.customized.gridview.VScrollView>-->
+                <!--<com.liu.customized.gridview.VScrollView-->
+                    <!--android:id="@+id/table_data_right_v_scroll"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_margin="0dp"-->
+                    <!--android:scrollbars="none"-->
+                    <!--&gt;-->
+                        <!--<com.liu.customized.gridview.HScrollView-->
+                                <!--android:id="@+id/table_data_right_h_scroll"-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="match_parent"-->
+                                <!--android:focusableInTouchMode="true"-->
+                                <!--android:layout_margin="0dp"-->
+                                <!--android:scrollbars="none"-->
+                                <!--&gt;-->
+                                <!--<com.liu.customized.gridview.VListView-->
+                                    <!--android:id="@+id/table_data_right_rows"-->
+                                    <!--android:layout_width="match_parent"-->
+                                    <!--android:layout_height="match_parent"-->
+                                    <!--android:scrollingCache="false"-->
+                                    <!--android:animationCache="false"-->
+                                    <!--android:dividerHeight="0dip">-->
+                                <!--</com.liu.customized.gridview.VListView>-->
+
+                        <!--</com.liu.customized.gridview.HScrollView>-->
+                <!--</com.liu.customized.gridview.VScrollView>-->
+
+        <!--</LinearLayout>-->
+
+
+
+</LinearLayout>
+

@@ -4,18 +4,22 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.liu.customized.R;
+import com.liu.customized.gridview.GridViewBeanComparator;
+import com.liu.customized.gridview.GridViewHeaderRowAdapter;
 import com.liu.utils.DisplayUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -29,31 +33,17 @@ import java.util.List;
  */
 
 public final class CustomizedTableView {
+    private OnTableViewRowHeaderActionListener mOnTableViewRowHeaderActionListener;
+    public void setmOnTableViewRowHeaderActionListener(OnTableViewRowHeaderActionListener listener)
+    {
+        mOnTableViewRowHeaderActionListener = listener;
+    }
     /**
-     * 单元格中预设空白长度
+     * private Fields
      */
-    public static final int CELL_BLANK_LENGTH = 0;
-    public static final int CELL_FONT_SIZE = 16;
-    public static final int DATA_ROW_HEIGHT = 93;
-    public static final int HEADER_ROW_HEIGHT = 150;
-    //region private Fields
     private CustomizedTableViewLayout mGridViewLayout;
 
-    private ListView mHeaderListLeft;
-    private ListView mHeaderListRight;
-    private VListView mDataListLeft;
-    private VListView mDataListRight;
-    private TableViewDataListAdapter mGridViewDataRightAdapter;
-    private TableViewDataListAdapter mGridViewDataLeftAdapter;
 
-    private HScrollView mRightHeaderHScroll;
-    private HScrollView mRightDataHScroll;
-    private VScrollView mLeftDataVScroll;
-    private VScrollView mRightDataVScroll;
-//    private HScrollView.ScrollViewListener mRightHeaderHScrollListener;
-//    private HScrollView.ScrollViewListener mRightDataHScrollListener;
-//    private VScrollView.ScrollViewListener mLeftDataVScrollListener;
-//    private VScrollView.ScrollViewListener mRightDataVScrollListener;
     private int parentContainerWidth = 0;
 
     private View mRootView;
@@ -66,18 +56,23 @@ public final class CustomizedTableView {
     private List<TableViewRowBean> mRightHeaders;
     private List<TableViewRowBean> mLeftRowDatas;
     private List<TableViewRowBean> mRightRowDatas;
-    private boolean mAllRowExpandFlag;
+    private TableViewDataBodyAdapter mDataBodyAdapter;
     private boolean mWrapRowFlag;
     private boolean mAutoFits;
     private boolean mShortTextFlag;
     private int mTotalColumnSpan;
-    private int mLeftHeaderTotalColumnSpan;
-    private int mRightHeaderTotalColumnSpan;
-    private int mLeftDataTotalColumnSpan;
-    private int mRightDataTotalColumnSpan;
-    private int mFixColumnCount;
-    //endregion
 
+    private int mFixColumnCount;
+    private int mFixRowCount;
+    private int mMaxFieldWidth;
+    private int mMaxFieldHeight;
+    private int mMinFieldWidth;
+    private int mMinFieldHeight;
+
+    private int[] mTableFieldWidth;
+    private int[] mTableFieldHeight;
+
+    private HScrollView.ScrollViewListener mScrollViewListener;
     /**
      * Private Constructor to insure WrapGridView can't be initiated the default way
      */
@@ -88,444 +83,197 @@ public final class CustomizedTableView {
         this.mHeaders = builder.mHeaders;
         this.mRowDatas = builder.mRowDatas;
         this.mWrapRowFlag = builder.mWrapRowFlag;
-        this.mAllRowExpandFlag = builder.mAllRowExpandFlag;
         this.mAutoFits = builder.mAutoFits;
         this.mShortTextFlag = builder.mShortTextFlag;
-        this.mFixColumnCount = builder.mfixColumnCount;
+        this.mFixColumnCount = builder.mFixColumnCount;
+        this.mFixRowCount = builder.mFixRowCount;
+        this.mMinFieldWidth = builder.mMinFieldWidth;
+        this.mMinFieldHeight = builder.mMinFieldHeight;
+        this.mMaxFieldWidth = builder.mMaxFieldWidth;
+        this.mMaxFieldHeight = builder.mMaxFieldHeight;
     }
 
     /* Init Grid View */
     private void loadGridView() {
-        int height = 0;
-        int width = 0;
-        this.prevSetting();
-
-
         mGridViewLayout = (CustomizedTableViewLayout) mRootView.findViewById(mViewId);
+
         mGridViewLayout.setGridView(this);
-        // 左抬头
-        mHeaderListLeft = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_left_rows);
-        if (!mWrapRowFlag)
-        {
-            width = (int)(mLeftHeaderTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedTableView.CELL_FONT_SIZE));
-            mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-            TableViewHeaderListAdapter gridViewHeaderLeftAdapter =
-                    new TableViewHeaderListAdapter(
-                            mContext,
-                            mLeftHeaders,
-                            mLeftRowDatas,
-                            0,
-                            mWrapRowFlag,
-                            mLeftHeaderTotalColumnSpan,
-                            mAllRowExpandFlag,
-                            mShortTextFlag, null);
-            mHeaderListLeft.setAdapter(gridViewHeaderLeftAdapter);
-        }
-        else
-        {
-            mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayoutCompat.LayoutParams.MATCH_PARENT));
+
+        // 行号
+        this.addFixRowNumbers();
+
+        // 计算行高、列宽
+        this.calculateTableFieldWidthAndHeight();
+
+        // 固定列
+        this.fixColumnSetting();
+
+        // 左标题
+        if (this.mLeftHeaders != null && this.mLeftHeaders.size() > 0) {
+            LinearLayout layoutView = (LinearLayout)mGridViewLayout.findViewById(
+                    R.id.customized_table_layout_left_header);
+            layoutView.removeAllViews();
+            for(int i=0; i<this.mLeftHeaders.size(); i++) {
+                for (int j=0;j<this.mLeftHeaders.get(i).getColumnCells().size(); j++) {
+                    TextView view = this.getActualTableHeaderTextView(
+                            this.mLeftHeaders.get(i).getColumnCells().get(j).getText(),
+                            this.mLeftHeaders.get(i).getColumnCells().get(j).getGravity(),
+                            i,
+                            j);
+                    layoutView.addView(view);
+                    final int colIndex = j;
+                    view.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                                if (mPreviousUpEvent != null
+                                        && mCurrentDownEvent != null
+                                        && isConsideredDoubleTap(mCurrentDownEvent,
+                                        mPreviousUpEvent, event)) {
+//                                    if (holder.mAscTextView.getVisibility() == View.VISIBLE)
+//                                    {
+//                                        holder.mDescTextView.setVisibility(View.VISIBLE);
+//                                        holder.mAscTextView.setVisibility(View.GONE);
+//                                        mOnGridViewRowCellActionListener.onDataSort(GridViewHeaderRowAdapter.this, v, position, mFixColumnCount, GridViewBeanComparator.ORDER_TYPE.DESC);
+//                                    }
+//                                    else
+//                                    {
+//                                        holder.mDescTextView.setVisibility(View.GONE);
+//                                        holder.mAscTextView.setVisibility(View.VISIBLE);
+                                    mOnTableViewRowHeaderActionListener.onDataSort(colIndex, 0, TableViewBeanComparator.ORDER_TYPE.DESC);
+//                                    }
+
+                                }
+                                mCurrentDownEvent = MotionEvent.obtain(event);
+                            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                                mPreviousUpEvent = MotionEvent.obtain(event);
+                            }
+                            return true;
+                        }
+                    });
+                }
+            }
         }
 
-        // 右抬头
-        mHeaderListRight = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_right_rows);
-        TableViewHeaderListAdapter gridViewHeaderRightAdapter =
-                new TableViewHeaderListAdapter(
-                        mContext,
-                        mRightHeaders,
-                        mRightRowDatas,
-                        mFixColumnCount,
-                        mWrapRowFlag,
-                        mRightHeaderTotalColumnSpan,
-                        mAllRowExpandFlag,
-                        mShortTextFlag, null);
-        gridViewHeaderRightAdapter.setOnGridViewDataSortListener(new TableViewHeaderListAdapter.OnGridViewDataSortListener()
+        // 右标题
+        if (this.mRightHeaders != null && this.mRightHeaders.size() > 0) {
+            LinearLayout layoutView = (LinearLayout)mGridViewLayout.findViewById(
+                    R.id.customized_table_layout_right_header);
+            layoutView.removeAllViews();
+            for(int i=0; i<this.mRightHeaders.size(); i++) {
+                for (int j=0;j<this.mRightHeaders.get(i).getColumnCells().size(); j++) {
+                    TextView view = this.getActualTableHeaderTextView(
+                            this.mRightHeaders.get(i).getColumnCells().get(j).getText(),
+                            this.mRightHeaders.get(i).getColumnCells().get(j).getGravity(),
+                            i,
+                            j + mFixColumnCount);
+                    layoutView.addView(view);
+                    final int colIndex = j;
+                    view.setOnTouchListener(new View.OnTouchListener() {
+                        @Override
+                        public boolean onTouch(View v, MotionEvent event) {
+                            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                                if (mPreviousUpEvent != null
+                                        && mCurrentDownEvent != null
+                                        && isConsideredDoubleTap(mCurrentDownEvent,
+                                        mPreviousUpEvent, event)) {
+//                                    if (holder.mAscTextView.getVisibility() == View.VISIBLE)
+//                                    {
+//                                        holder.mDescTextView.setVisibility(View.VISIBLE);
+//                                        holder.mAscTextView.setVisibility(View.GONE);
+//                                        mOnGridViewRowCellActionListener.onDataSort(GridViewHeaderRowAdapter.this, v, position, mFixColumnCount, GridViewBeanComparator.ORDER_TYPE.DESC);
+//                                    }
+//                                    else
+//                                    {
+//                                        holder.mDescTextView.setVisibility(View.GONE);
+//                                        holder.mAscTextView.setVisibility(View.VISIBLE);
+                                    mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
+//                                    }
+
+                                }
+                                mCurrentDownEvent = MotionEvent.obtain(event);
+                            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                                mPreviousUpEvent = MotionEvent.obtain(event);
+                            }
+                            return true;
+                        }
+                    });
+                }
+            }
+        }
+
+        // 数据
+        if (mLeftRowDatas != null && this.mLeftRowDatas.size() > 0 )
         {
+            RecyclerView view = (RecyclerView)mGridViewLayout.findViewById(
+                    R.id.customized_table_layout_body);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            view.setLayoutManager(layoutManager);
+            mDataBodyAdapter = new TableViewDataBodyAdapter(
+                    mContext,
+                    mFixRowCount,
+                    mFixColumnCount,
+                    mLeftRowDatas,
+                    mRightRowDatas,
+                    mTableFieldWidth,
+                    mTableFieldHeight);
+            view.setAdapter(mDataBodyAdapter);
+            // 水平滚动条
+            final HScrollView hHeaderScrollView = (HScrollView)mGridViewLayout.findViewById(
+                    R.id.table_header_right_h_scroll);
+            mDataBodyAdapter.setScrollViewListener(new HScrollView.ScrollViewListener() {
+                @Override
+                public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
+                    if (hHeaderScrollView != null)
+                    {
+                        hHeaderScrollView.smoothScrollTo(x, y);
+                    }
+                }
+            });
+        }
+
+        this.setmOnTableViewRowHeaderActionListener(new OnTableViewRowHeaderActionListener() {
             @Override
-            public void onDataSort(int position, int offset, TableViewBeanComparator.ORDER_TYPE orderType) {
-                // 数据排序
-                Collections.sort(mRowDatas, new TableViewBeanComparator(true, position+offset, orderType));
+            public void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType) {
+// 数据排序
+                Collections.sort(mRowDatas, new TableViewBeanComparator(true, position + positionOffset, orderType));
 
                 // 行号设定
                 resetFixRowNumbers();
 
                 // 数据重新分割
                 fixColumnSetting();
-                mGridViewDataRightAdapter.setDataRows(mRightRowDatas);
-                final TableViewDataListAdapter rightAdapter = mGridViewDataRightAdapter;
-                Handler rightHandler= new Handler();
-                rightHandler.post(new Runnable(){
-                    @Override
-                    public void run() {
-                        rightAdapter.notifyDataSetChanged();
-                    }
-                });
-                if (!mWrapRowFlag)
-                {
-                    mGridViewDataLeftAdapter.setDataRows(mLeftRowDatas);
-                    final TableViewDataListAdapter leftAdapter = mGridViewDataLeftAdapter;
 
-                    Handler leftHandler= new Handler();
-                    leftHandler.post(new Runnable(){
-                        @Override
-                        public void run() {
-                            leftAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
+                mDataBodyAdapter.setLeftRowDatas(mLeftRowDatas);
+                mDataBodyAdapter.setRightRowDatas(mRightRowDatas);
+                mDataBodyAdapter.notifyDataSetChanged();
+//                final GridViewDataListAdapter rightAdapter = mGridViewDataRightAdapter;
+//                Handler rightHandler= new Handler();
+//                rightHandler.post(new Runnable(){
+//                    @Override
+//                    public void run() {
+//                        rightAdapter.notifyDataSetChanged();
+//                    }
+//                });
+//                if (!mWrapRowFlag)
+//                {
+//                    mGridViewDataLeftAdapter.setDataRows(mLeftRowDatas);
+//                    final GridViewDataListAdapter leftAdapter = mGridViewDataLeftAdapter;
+//
+//                    Handler leftHandler= new Handler();
+//                    leftHandler.post(new Runnable(){
+//                        @Override
+//                        public void run() {
+//                            leftAdapter.notifyDataSetChanged();
+//                        }
+//                    });
+//                }
             }
         });
-        mHeaderListRight.setAdapter(gridViewHeaderRightAdapter);
-        // 左数据
-        mDataListLeft = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_left_rows);
-        if (!mWrapRowFlag)
-        {
-            // 整行显示时，全部加载
-            height = (int)(mLeftRowDatas.size() * CustomizedTableView.DATA_ROW_HEIGHT);
-            mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-
-            // 逐行加载
-//            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
-//            mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parentHeight - HEADER_ROW_HEIGHT));
-//            mDataListLeft.setAdjustHeightListener(new VListView.AdjustHeightListener() {
-//                @Override
-//                public void adjustHeight(int height) {
-//                    int totalHeight = (int)(mLeftRowDatas.size() * CustomizedGridView.DATA_ROW_HEIGHT);
-//                    if (mDataListLeft.getHeight() + height < totalHeight)
-//                    {
-//                        mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mDataListLeft.getHeight() + height));
-//                    }
-//                }
-//            });
-            mGridViewDataLeftAdapter = new TableViewDataListAdapter(this.mContext,
-                    mLeftHeaders,
-                    mLeftRowDatas,
-                    0,
-                    this.mWrapRowFlag,
-                    this.mLeftDataTotalColumnSpan,
-                    this.mAllRowExpandFlag,
-                    this.mShortTextFlag,
-                    null);
-            mDataListLeft.setAdapter(mGridViewDataLeftAdapter);
-            mDataListLeft.setListViewListener(new VListView.ListViewListener(){
-                @Override
-                public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
-
-                }
-
-                @Override
-                public void onScrollPositionFromTop(ListView scrollView, int position, int top) {
-                    if (mDataListRight != null){
-                        mDataListRight.smoothScrollToPositionFromTop(position, top);
-                    }
-                }
-
-                @Override
-                public void onScrollOver(ListView scrollView, VListView.SCROLL_DIRECTION direction) {
-                    Toast.makeText(mContext, "Over：" + direction,
-                            Toast.LENGTH_SHORT).show();
-                }
-
-
-            });
-
-            //        mDataListLeft.setTouchEnable(false);
-//        mDataListLeft.setOnScrollListener(new AbsListView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(AbsListView view, int scrollState) {
-//                if (mDataListRight != null &&
-//                    scrollState == SCROLL_STATE_IDLE ||
-//                    scrollState == SCROLL_STATE_TOUCH_SCROLL  )
-//                {
-////                    View subView = view.getChildAt(0);
-////                    if (subView != null)
-////                    {
-////                        int top = subView.getTop();
-////                        mDataListRight.smoothScrollToPositionFromTop(view.getFirstVisiblePosition(), top);
-////                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onScroll(AbsListView view, int firstVisibleItem,
-//                                 int visibleItemCount, int totalItemCount) {
-//                if (mDataListRight != null)
-//                {
-////                    View subView = view.getChildAt(0);
-////                    if (subView != null)
-////                    {
-////                        int top = subView.getTop();
-////                        mDataListRight.smoothScrollToPositionFromTop(firstVisibleItem, top);
-////                    }
-//                }
-//            }
-//        });
-////        mDataListLeft.setListViewListener(new VListView.ListViewListener(){
-////            @Override
-////            public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
-////                if (mDataListRight != null )
-////                {
-////                    View subView = scrollView.getChildAt(0);
-////                    if (subView != null)
-////                    {
-////                        int top = subView.getTop();
-////                        mDataListRight.smoothScrollToPositionFromTop(scrollView.getFirstVisiblePosition(), top);
-////                    }
-////                }
-////            }
-////        });
-        }
-
-
-        // 右数据
-        mDataListRight = (VListView) mGridViewLayout.findViewById(R.id.grid_view_data_right_rows);
-        if (!mWrapRowFlag)
-        {
-            // 整行显示时，全部加载
-            height = (int)(mRightRowDatas.size() * CustomizedTableView.DATA_ROW_HEIGHT);
-            mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-//            // 逐行加载
-//            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
-//            mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parentHeight - HEADER_ROW_HEIGHT));
-//            mDataListRight.setAdjustHeightListener(new VListView.AdjustHeightListener() {
-//                @Override
-//                public void adjustHeight(int height) {
-//                    int totalHeight = (int)(mRightRowDatas.size() * CustomizedGridView.DATA_ROW_HEIGHT);
-//                    if (mDataListRight.getHeight() + height < totalHeight)
-//                    {
-//                        mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mDataListRight.getHeight() + height));
-//                    }
-//                }
-//            });
-        }
-        else {
-            // 满屏显示
-            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
-            mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, parentHeight - HEADER_ROW_HEIGHT));
-        }
-        if (mRightRowDatas != null)
-        {
-            mGridViewDataRightAdapter = new TableViewDataListAdapter(this.mContext,
-                    mRightHeaders,
-                    mRightRowDatas,
-                    mFixColumnCount,
-                    this.mWrapRowFlag,
-                    this.mRightDataTotalColumnSpan,
-                    this.mAllRowExpandFlag,
-                    this.mShortTextFlag,
-                    null);
-            mDataListRight.setAdapter(mGridViewDataRightAdapter);
-            mDataListRight.setListViewListener(new VListView.ListViewListener() {
-                @Override
-                public void onScrollChanged(ListView scrollView, int l, int t, int oldL, int oldT) {
-
-                }
-
-                @Override
-                public void onScrollPositionFromTop(ListView scrollView, int position, int top) {
-                    if (mDataListLeft != null){
-                        mDataListLeft.smoothScrollToPositionFromTop(position, top);
-                    }
-                }
-
-                @Override
-                public void onScrollOver(ListView scrollView, VListView.SCROLL_DIRECTION direction) {
-                    Toast.makeText(mContext, "Over：" + direction,
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        // 滚动条
-        if (!mWrapRowFlag)
-        {
-            mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
-            mRightDataHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_h_scroll);
-            HScrollView.ScrollViewListener rightDataHScrollListener = new HScrollView.ScrollViewListener() {
-                @Override
-                public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
-
-                    if (mRightHeaderHScroll != null)
-                    {
-                        mRightHeaderHScroll.smoothScrollTo(x, y);
-                    }
-                }
-            };
-
-            HScrollView.ScrollViewListener rightHeaderHScrollListener = new HScrollView.ScrollViewListener() {
-                @Override
-                public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
-                    if (mRightDataHScroll != null)
-                    {
-                        mRightDataHScroll.smoothScrollTo(x, y);
-                    }
-                }
-            };
-
-            mRightDataHScroll.setScrollViewListener(rightDataHScrollListener);
-            mRightHeaderHScroll.setScrollViewListener(rightHeaderHScrollListener);
-
-            mRightDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_v_scroll);
-            mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
-            // 设定高度、宽度
-            width = (int)(mLeftDataTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedTableView.CELL_FONT_SIZE));
-            mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
-
-
-            VScrollView.ScrollViewListener leftDataVScrollListener = new VScrollView.ScrollViewListener() {
-                @Override
-                public void onScrollChanged(ScrollView scrollView, int x, int y, int oldX, int oldY) {
-                    if (mRightDataVScroll != null)
-                    {
-                        mRightDataVScroll.smoothScrollTo(x, y);
-                    }
-                }
-            };
-            VScrollView.ScrollViewListener rightDataVScrollListener = new VScrollView.ScrollViewListener() {
-                @Override
-                public void onScrollChanged(ScrollView scrollView, int x, int y, int oldX, int oldY) {
-
-                    if (mLeftDataVScroll != null)
-                    {
-                        mLeftDataVScroll.smoothScrollTo(x, y);
-                    }
-                }
-            };
-            mLeftDataVScroll.setScrollViewListener(leftDataVScrollListener);
-            mRightDataVScroll.setScrollViewListener(rightDataVScrollListener);
-        }
-        else
-        {
-            mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
-            mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT));
-
-            mRightHeaderHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_header_right_h_scroll);
-            mRightHeaderHScroll.setToucheEnabled(false);
-            mRightDataHScroll = (HScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_h_scroll);
-            mRightDataHScroll.setToucheEnabled(false);
-        }
-
-
 
     }
-
-//    public int px2dp(int px) {
-//        DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-//        int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-//        return dp;
-//    }
-//    public int dp2px(int dp) {
-//        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-//                mContext.getResources().getDisplayMetrics());
-//    }
-
-    private void resetFixRowNumbers()
-    {
-        for (int i=0; i< this.mRowDatas.size(); i++)
-        {
-            String value = String.valueOf(i + 1);
-            this.mRowDatas.get(i).getColumnCells().get(0).setValue(value);
-        }
-    }
-
-    private void addFixRowNumbers()
-    {
-        if (mFixColumnCount <= 0 || this.mWrapRowFlag)
-        {
-            return;
-        }
-
-        for (int i=0; i< this.mRowDatas.size(); i++)
-        {
-            TableViewRowBean row = this.mRowDatas.get(i);
-            String id = "dataCol" + i;
-            String value = String.valueOf(i + 1);
-            TableViewCellBean cell = new TableViewCellBean(id, value);
-            this.mRowDatas.get(i).getColumnCells().add(0, cell);
-        }
-        for (int i=0; i< this.mHeaders.size(); i++)
-        {
-            if (i == 0)
-            {
-                TableViewRowBean row = this.mHeaders.get(i);
-                String id = "headerCol" + i;
-                String value = " No. ";
-                TableViewCellBean cell = new TableViewCellBean(id, value);
-                this.mHeaders.get(i).getColumnCells().add(0, cell);
-            }
-            else
-            {
-                TableViewRowBean row = this.mHeaders.get(i);
-                String id = "headerCol" + i;
-                String value = "";
-                TableViewCellBean cell = new TableViewCellBean(id, value);
-                this.mHeaders.get(i).getColumnCells().add(0, cell);
-            }
-        }
-    }
-
-    private void prevSetting()
-    {
-        this.addFixRowNumbers();
-        parentContainerWidth = DisplayUtils.getDisplayWidth(this.mContext);
-        int[] initColLength = this.calculateColumnTextLength(this.mHeaders, this.mRowDatas);
-        this.calculateRowColSetting(this.mRowDatas);
-        if (this.mAutoFits)
-        {
-            if (this.mWrapRowFlag)
-            {
-                if(DisplayUtils.isPad(this.mContext))
-                {
-                    mTotalColumnSpan = (int)(parentContainerWidth / DisplayUtils.getDisplayFontPxForPad(CELL_FONT_SIZE));
-                }
-                else
-                {
-                    mTotalColumnSpan = (int)(parentContainerWidth / DisplayUtils.getDisplayFontPx(CELL_FONT_SIZE));
-                }
-                // 去除行号
-                int numberLength = String.valueOf(this.mRowDatas.size()).length();
-                if (numberLength < 5)
-                {
-                    numberLength = 5;
-                }
-                mTotalColumnSpan -= numberLength;
-
-                this.calculateColSpan(this.mHeaders, this.mRowDatas, initColLength);
-                mRightHeaderTotalColumnSpan += mTotalColumnSpan;
-                mRightDataTotalColumnSpan += mTotalColumnSpan;
-            } else {
-                // 非折行时容器定宽显示
-                for(int i=0; i< initColLength.length; i++)
-                {
-                    mTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
-                    if (mFixColumnCount > 0)
-                    {
-                        if (i < mFixColumnCount)
-                        {
-                            mLeftHeaderTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
-                            mLeftDataTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
-                        }
-                        else
-                        {
-                            mRightHeaderTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
-                            mRightDataTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
-                        }
-                    }
-                    else
-                    {
-                        mRightHeaderTotalColumnSpan += mTotalColumnSpan;
-                        mRightDataTotalColumnSpan += mTotalColumnSpan;
-                    }
-
-                }
-                this.calculateColSpan(this.mHeaders, this.mRowDatas, initColLength);
-            }
-        }
-        // 冻结列的设定
-        fixColumnSetting();
-    }
-
-    private void fixColumnSetting()
-    {
+    private void fixColumnSetting() {
         if (mFixColumnCount <= 0 || this.mWrapRowFlag)
         {
             mLeftHeaders = null;
@@ -594,6 +342,255 @@ public final class CustomizedTableView {
         }
 
     }
+
+    private void calculateTableFieldWidthAndHeight()
+    {
+        if (mTableFieldWidth == null)
+        {
+            mTableFieldWidth = new int[this.mHeaders.get(0).getColumnCells().size()];
+        }
+        int rowCount = 0;
+        if (this.mRowDatas == null)
+        {
+            rowCount = this.mHeaders.size();
+        }
+        else
+        {
+            rowCount = this.mHeaders.size() + this.mRowDatas.size();
+        }
+        if (mTableFieldHeight == null)
+        {
+            mTableFieldHeight = new int[this.mHeaders.size() + this.mRowDatas.size()];
+        }
+        for (int i=0; i< this.mHeaders.size(); i++)
+        {
+            for(int j=0; j<this.mHeaders.get(i).getColumnCells().size(); j++)
+            {
+                TextView textView = getVisualTableTextView(
+                        this.mHeaders.get(i).getColumnCells().get(j).getText(),
+                        this.mHeaders.get(i).getColumnCells().get(j).getGravity());
+                int width = measureTextWidth(textView);
+                int height = measureTextHeight(textView);
+                if (mTableFieldWidth[j] < width)
+                {
+                    mTableFieldWidth[j] = width;
+                }
+                if (mTableFieldHeight[i] < height)
+                {
+                    mTableFieldHeight[i] = height;
+                }
+            }
+        }
+
+        for (int i=0; i< this.mRowDatas.size(); i++)
+        {
+            for(int j=0; j<this.mRowDatas.get(i).getColumnCells().size(); j++)
+            {
+                TextView textView = getVisualTableTextView(
+                        this.mRowDatas.get(i).getColumnCells().get(j).getText(),
+                        this.mRowDatas.get(i).getColumnCells().get(j).getGravity());
+                int width = measureTextWidth(textView);
+                int height = measureTextHeight(textView);
+                if (mTableFieldWidth[j] < width)
+                {
+                    mTableFieldWidth[j] = width;
+                }
+                if (mTableFieldHeight[i + mFixRowCount] < height)
+                {
+                    mTableFieldHeight[i + mFixRowCount] = height;
+                }
+            }
+        }
+    }
+
+    private TextView getVisualTableTextView(String text, int gravity) {
+        TextView textView = new TextView(mContext);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TableViewConstants.CELL_FONT_SIZE);
+        textView.setText(text);
+        if (gravity == Gravity.NO_GRAVITY)
+        {
+            textView.setGravity(Gravity.CENTER);
+        }
+        else
+        {
+            textView.setGravity(gravity);
+        }
+
+        //设置布局
+        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        textViewParams.setMargins(TableViewConstants.CELL_MARGIN_LEFT,
+                TableViewConstants.CELL_MARGIN_TOP,
+                TableViewConstants.CELL_MARGIN_RIGHT,
+                TableViewConstants.CELL_MARGIN_BOTTOM);
+        textView.setLayoutParams(textViewParams);
+
+        return textView;
+    }
+
+    private TextView getActualTableHeaderTextView(String text, int gravity, int rowIndex, int colIndex) {
+        TextView textView = new TextView(mContext);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TableViewConstants.CELL_FONT_SIZE);
+        textView.setText(text);
+        if (gravity == Gravity.NO_GRAVITY)
+        {
+            textView.setGravity(Gravity.CENTER);
+        }
+        else
+        {
+            textView.setGravity(gravity);
+        }
+
+        //设置布局
+        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        textViewParams.setMargins(TableViewConstants.CELL_MARGIN_LEFT,
+                TableViewConstants.CELL_MARGIN_TOP,
+                TableViewConstants.CELL_MARGIN_RIGHT,
+                TableViewConstants.CELL_MARGIN_BOTTOM);
+//                textView.setBackground(ContextCompat.getDrawable(mContext,R.drawable.table_header_label_bg));
+        textView.setBackgroundResource(R.drawable.table_header_label_bg);
+        textView.setLayoutParams(textViewParams);
+        textView.setPadding(TableViewConstants.CELL_PADDING_LEFT,
+                TableViewConstants.CELL_PADDING_TOP,
+                TableViewConstants.CELL_PADDING_RIGHT,
+                TableViewConstants.CELL_PADDING_BOTTOM);
+        int height = mTableFieldHeight[rowIndex];
+        int width = mTableFieldWidth[colIndex];
+        textViewParams.height = DisplayUtils.dip2px(mContext, height);
+        textViewParams.width = DisplayUtils.dip2px(mContext, width);
+        textView.setLayoutParams(textViewParams);
+        return textView;
+    }
+    private int measureTextWidth(TextView textView) {
+        int width = 0;
+        if (textView != null) {
+            LinearLayout.LayoutParams layoutParams =
+                    (LinearLayout.LayoutParams) textView.getLayoutParams();
+            width = DisplayUtils.px2dip(mContext, layoutParams.leftMargin) +
+                    DisplayUtils.px2dip(mContext, layoutParams.rightMargin) +
+                    DisplayUtils.px2dip(mContext, TableViewConstants.CELL_PADDING_LEFT) +
+                    DisplayUtils.px2dip(mContext, TableViewConstants.CELL_PADDING_RIGHT) +
+                    getTextViewWidth(textView);
+            if (width < mMinFieldWidth) {
+                return mMinFieldWidth;
+            } else if (width > mMaxFieldWidth) {
+                return mMaxFieldWidth;
+            } else {
+                return width;
+            }
+        }
+        return width;
+    }
+
+    private int measureTextHeight(TextView textView) {
+        int height = 0;
+        if (textView != null) {
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) textView.getLayoutParams();
+            height = DisplayUtils.px2dip(mContext, layoutParams.topMargin) +
+                    DisplayUtils.px2dip(mContext, layoutParams.bottomMargin) +
+                    DisplayUtils.px2dip(mContext, TableViewConstants.CELL_PADDING_TOP) +
+                    DisplayUtils.px2dip(mContext, TableViewConstants.CELL_PADDING_BOTTOM) +
+                    getTextViewHeight(textView);
+            if (height < mMinFieldHeight) {
+                return mMinFieldHeight;
+            } else if (height > mMaxFieldHeight) {
+                return mMaxFieldHeight;
+            } else {
+                return height;
+            }
+        }
+        return height;
+    }
+
+    private int getTextViewHeight(TextView textView) {
+        if (textView != null) {
+            int width = measureTextWidth(textView);
+            TextPaint textPaint = textView.getPaint();
+            StaticLayout staticLayout = new StaticLayout(textView.getText(), textPaint, DisplayUtils.dip2px(mContext, width), Layout.Alignment.ALIGN_NORMAL, 1, 0, false);
+            int height = DisplayUtils.px2dip(mContext, staticLayout.getHeight());
+            return height;
+        }
+        return 0;
+    }
+
+    private int getTextViewWidth(TextView view) {
+        if (view != null) {
+            TextPaint paint = view.getPaint();
+            return DisplayUtils.px2dip(mContext, (int) paint.measureText(view.getText() + ""));
+        }
+        return 0;
+    }
+
+
+    private final int DOUBLE_TAP_TIMEOUT = 200;
+    private MotionEvent mCurrentDownEvent;
+    private MotionEvent mPreviousUpEvent;
+
+
+
+    private boolean isConsideredDoubleTap(MotionEvent firstDown,
+                                          MotionEvent firstUp, MotionEvent secondDown) {
+        if (secondDown.getEventTime() - firstUp.getEventTime() > DOUBLE_TAP_TIMEOUT) {
+            return false;
+        }
+        int deltaX = (int) firstUp.getX() - (int) secondDown.getX();
+        int deltaY = (int) firstUp.getY() - (int) secondDown.getY();
+        return deltaX * deltaX + deltaY * deltaY < 10000;
+    }
+
+    public interface OnTableViewRowHeaderActionListener {
+        void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType);
+    }
+
+    private void resetFixRowNumbers()
+    {
+        for (int i=0; i< this.mRowDatas.size(); i++)
+        {
+            String value = String.valueOf(i + 1);
+            this.mRowDatas.get(i).getColumnCells().get(0).setValue(value);
+        }
+    }
+
+    private void addFixRowNumbers()
+    {
+        if (mFixColumnCount <= 0 || this.mWrapRowFlag)
+        {
+            return;
+        }
+
+        for (int i=0; i< this.mRowDatas.size(); i++)
+        {
+            TableViewRowBean row = this.mRowDatas.get(i);
+            String id = "dataCol" + i;
+            String value = String.valueOf(i + 1);
+            TableViewCellBean cell = new TableViewCellBean(id, value);
+            this.mRowDatas.get(i).getColumnCells().add(0, cell);
+        }
+        for (int i=0; i< this.mHeaders.size(); i++)
+        {
+            if (i == 0)
+            {
+                TableViewRowBean row = this.mHeaders.get(i);
+                String id = "headerCol" + i;
+                String value = " No. ";
+                TableViewCellBean cell = new TableViewCellBean(id, value);
+                this.mHeaders.get(i).getColumnCells().add(0, cell);
+            }
+            else
+            {
+                TableViewRowBean row = this.mHeaders.get(i);
+                String id = "headerCol" + i;
+                String value = "";
+                TableViewCellBean cell = new TableViewCellBean(id, value);
+                this.mHeaders.get(i).getColumnCells().add(0, cell);
+            }
+        }
+    }
+
+
 
     private int[] calculateColumnTextLength(List<TableViewRowBean> rowHeaders, List<TableViewRowBean> rowDatas)
     {
@@ -682,7 +679,7 @@ public final class CustomizedTableView {
                 int headerSpan = 0;
                 if (!mWrapRowFlag)
                 {
-                    span = lengthDatas[i] + CustomizedTableView.CELL_BLANK_LENGTH;
+                    span = lengthDatas[i] + TableViewConstants.CELL_BLANK_LENGTH;
                 }
                 else
                 {
@@ -703,7 +700,7 @@ public final class CustomizedTableView {
                     int nextHeaderSpan = 0;
                     if (!mWrapRowFlag)
                     {
-                        nextSpan = lengthDatas[i + 1] + CustomizedTableView.CELL_BLANK_LENGTH;
+                        nextSpan = lengthDatas[i + 1] + TableViewConstants.CELL_BLANK_LENGTH;
                     }
                     else
                     {
@@ -766,9 +763,12 @@ public final class CustomizedTableView {
         private boolean mWrapRowFlag;
         private boolean mAutoFits;
         private boolean mShortTextFlag;
-        private int mfixColumnCount;
-
-
+        private int mFixColumnCount;
+        private int mMaxFieldWidth;
+        private int mMaxFieldHeight;
+        private int mMinFieldWidth;
+        private int mMinFieldHeight;
+        private int mFixRowCount;
         /**
          * @param activity pass the activity where WrapGridView is attached
          * @param viewId   the id specified for WrapGridViewView in your layout
@@ -806,7 +806,31 @@ public final class CustomizedTableView {
         }
 
         public Builder fixColumnCount(int fixColumnCount) {
-            this.mfixColumnCount = fixColumnCount;
+            this.mFixColumnCount = fixColumnCount;
+            return this;
+        }
+
+        public Builder fixRowCount(int fixRowCount) {
+            this.mFixRowCount = fixRowCount;
+            return this;
+        }
+
+        public Builder minFieldWidth(int minFieldWidth) {
+            this.mMinFieldWidth = minFieldWidth;
+            return this;
+        }
+
+        public Builder minFieldHeight(int minFieldHeight) {
+            this.mMinFieldHeight = minFieldHeight;
+            return this;
+        }
+        public Builder maxFieldWidth(int maxFieldWidth) {
+            this.mMaxFieldWidth = maxFieldWidth;
+            return this;
+        }
+
+        public Builder maxFieldHeight(int maxFieldHeight) {
+            this.mMaxFieldHeight = maxFieldHeight;
             return this;
         }
 
@@ -824,6 +848,9 @@ public final class CustomizedTableView {
             mAutoFits = true;
             mShortTextFlag = false;
             mWrapRowFlag = false;
+            mMaxFieldWidth = 300;
+            mMaxFieldHeight = 75;
+            mFixRowCount = 1;
         }
     }
 

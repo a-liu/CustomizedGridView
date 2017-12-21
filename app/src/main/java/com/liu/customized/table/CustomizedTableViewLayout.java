@@ -11,45 +11,45 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.liu.customized.R;
-import com.liu.customized.table.CustomizedTableView;
 
 /**
  * Created by liu.jianfei on 2017/12/15.
  */
 
 public class CustomizedTableViewLayout extends ViewGroup {
-    private CustomizedTableView mGridViewManage;
+    private CustomizedTableView mTableViewManage;
     private OnLoadCompleteListener mOnLoadCompleteListener;
-    public void setOnLoadCompleteListener(OnLoadCompleteListener onLoadCompleteListener)
-    {
+    public void setOnLoadCompleteListener(OnLoadCompleteListener onLoadCompleteListener) {
         mOnLoadCompleteListener = onLoadCompleteListener;
     }
+
     public CustomizedTableViewLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater mInflater = LayoutInflater.from(context);
-        View view = mInflater.inflate(R.layout.customized_grid_view_layout, null);
+        View view = mInflater.inflate(R.layout.customized_table_view_layout, null);
         addView(view);
     }
 
     public CustomizedTableViewLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         LayoutInflater mInflater = LayoutInflater.from(context);
-        View view = mInflater.inflate(R.layout.customized_grid_view_layout, null);
+        View view = mInflater.inflate(R.layout.customized_table_view_layout, null);
         addView(view);
     }
 
     public CustomizedTableViewLayout(Context context) {
         super(context);
         LayoutInflater mInflater = LayoutInflater.from(context);
-        View view = mInflater.inflate(R.layout.customized_grid_view_layout, null);
+        View view = mInflater.inflate(R.layout.customized_table_view_layout, null);
         addView(view);
     }
-    public CustomizedTableView getGridView() {
-        return mGridViewManage;
+
+    public CustomizedTableView getTableView() {
+        return mTableViewManage;
     }
 
-    public void setGridView(CustomizedTableView gridView) {
-        this.mGridViewManage = gridView;
+    public void setGridView(CustomizedTableView tableView) {
+        this.mTableViewManage = tableView;
     }
 
     @SuppressLint("NewApi") @Override
