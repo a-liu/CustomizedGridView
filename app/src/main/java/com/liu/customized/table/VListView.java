@@ -1,15 +1,12 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.table;
 
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.HorizontalScrollView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 /**
  * Created by liu.jianfei on 2017/12/18.
@@ -101,7 +98,7 @@ public class VListView extends ListView {
                         if (view.getLastVisiblePosition() <= 0) {
                             if (mListViewListener != null)
                             {
-                                mListViewListener.onScrollOver(VListView.this,SCROLL_DIRECTION.UP);
+                                mListViewListener.onScrollOver(VListView.this, SCROLL_DIRECTION.UP);
                             }
                         }
                         break;

@@ -1,4 +1,4 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.table;
 
 import java.util.List;
 
@@ -6,11 +6,11 @@ import java.util.List;
  * Created by liu.jianfei on 2017/12/11.
  */
 
-public class GridViewRowBean {
+public class TableViewRowBean {
     private String id;
     private int rowNumber;
     private boolean wrap;
-    private List<GridViewCellBean> columnCells;
+    private List<TableViewCellBean> columnCells;
 
     public String getId() {
         return id;
@@ -36,11 +36,11 @@ public class GridViewRowBean {
         this.wrap = wrap;
     }
 
-    public List<GridViewCellBean> getColumnCells() {
+    public List<TableViewCellBean> getColumnCells() {
         return columnCells;
     }
 
-    public void setColumnCells(List<GridViewCellBean> columnCells) {
+    public void setColumnCells(List<TableViewCellBean> columnCells) {
         this.columnCells = columnCells;
     }
 }

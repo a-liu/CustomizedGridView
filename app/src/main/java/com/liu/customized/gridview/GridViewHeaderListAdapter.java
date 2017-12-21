@@ -1,4 +1,4 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.gridview;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
@@ -14,8 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.liu.customizedgridview.R;
-import com.liu.customizedgridview.utils.DisplayUtils;
+import com.liu.customized.R;
+import com.liu.utils.DisplayUtils;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
     private Activity mContext = null;
     private int mTotalColumnSpan;
 //    private int parentContainerWidth = 0;
-    //    private GridViewDataListAdapter.GridViewListAdapterListener mListener;
+    //    private TableViewDataListAdapter.GridViewListAdapterListener mListener;
     private Drawable mTintedCheck;
     private boolean mWrapRowFlag;
     private boolean mShortTextFlag;
@@ -55,7 +55,7 @@ public class GridViewHeaderListAdapter extends ArrayAdapter<GridViewRowBean> {
         this.mWrapRowFlag = wrapRowFlag;
         this.mInitColumnCount = initColumnCount;
         this.mDisplayFlag = DISPLAY_ROW_MEMBER.COLUMN;
-//        this.mListener = (GridViewDataListAdapter.GridViewListAdapterListener) context;
+//        this.mListener = (TableViewDataListAdapter.GridViewListAdapterListener) context;
 //        this.mAvatarRadiusDimension = context.getResources().getDimension(R.dimen.list_item_avatar_icon_radius);
         this.mTintedCheck = tintedCheck;
         this.mShortTextFlag = shortText;

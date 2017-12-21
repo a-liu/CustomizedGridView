@@ -1,29 +1,22 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.gridview;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 
-import com.liu.customizedgridview.R;
-import com.liu.customizedgridview.utils.DisplayUtils;
+import com.liu.customized.R;
+import com.liu.utils.DisplayUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
 
@@ -37,7 +30,7 @@ public class GridViewDataListAdapter extends ArrayAdapter<GridViewRowBean> {
     private Activity mContext = null;
     private int mFixColumnCount;
 
-//    private GridViewDataListAdapter.GridViewListAdapterListener mListener;
+//    private TableViewDataListAdapter.GridViewListAdapterListener mListener;
     private Drawable mTintedCheck;
     private boolean mWrapRowFlag;
     private boolean mShortTextFlag;

@@ -1,18 +1,16 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.gridview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
-import com.liu.customizedgridview.R;
+import com.liu.customized.R;
 
 /**
  * Created by liu.jianfei on 2017/12/15.

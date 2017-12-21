@@ -1,6 +1,5 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.gridview;
 
-import java.lang.reflect.Method;
 import java.util.Comparator;
 
 /**

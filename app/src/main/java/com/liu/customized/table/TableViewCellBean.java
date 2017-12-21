@@ -1,9 +1,9 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.table;
 
 /**
  * Created by liu.jianfei on 2017/12/8.
  */
-public class GridViewCellBean {
+public class TableViewCellBean {
     private String id;
     private int colNumber;
     private int rowNumber;
@@ -136,7 +136,7 @@ public class GridViewCellBean {
         this.gravity = gravity;
     }
 
-    public GridViewCellBean(String id, String value)
+    public TableViewCellBean(String id, String value)
     {
         this.id = id;
         this.value = value;

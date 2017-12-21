@@ -27,4 +27,19 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/colorTextForePrimary</item>
     </style>
+
+    <style name="TableHeaderTitle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/table_header_label_bg</item>
+    </style>
+    <style name="TableContentLabel">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/colorLabelPrimaryDark</item>
+        <item name="android:background">@drawable/table_content_label_bg</item>
+    </style>
+    <style name="TableContentText">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/colorTextForePrimary</item>
+    </style>
 </resources>

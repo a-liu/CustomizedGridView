@@ -1,4 +1,4 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.table;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -15,8 +15,8 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-import com.liu.customizedgridview.R;
-import com.liu.customizedgridview.utils.DisplayUtils;
+import com.liu.customized.R;
+import com.liu.utils.DisplayUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
@@ -28,7 +28,7 @@ import java.util.List;
  * Created by liu.jianfei on 2017/12/14.
  */
 
-public final class CustomizedGridView {
+public final class CustomizedTableView {
     /**
      * 单元格中预设空白长度
      */
@@ -37,14 +37,14 @@ public final class CustomizedGridView {
     public static final int DATA_ROW_HEIGHT = 93;
     public static final int HEADER_ROW_HEIGHT = 150;
     //region private Fields
-    private CustomizedGridViewLayout mGridViewLayout;
+    private CustomizedTableViewLayout mGridViewLayout;
 
     private ListView mHeaderListLeft;
     private ListView mHeaderListRight;
     private VListView mDataListLeft;
     private VListView mDataListRight;
-    private GridViewDataListAdapter mGridViewDataRightAdapter;
-    private GridViewDataListAdapter mGridViewDataLeftAdapter;
+    private TableViewDataListAdapter mGridViewDataRightAdapter;
+    private TableViewDataListAdapter mGridViewDataLeftAdapter;
 
     private HScrollView mRightHeaderHScroll;
     private HScrollView mRightDataHScroll;
@@ -60,12 +60,12 @@ public final class CustomizedGridView {
     private boolean mLoading;
     private Activity mContext;
     private final int mViewId;
-    private List<GridViewRowBean> mHeaders;
-    private List<GridViewRowBean> mRowDatas;
-    private List<GridViewRowBean> mLeftHeaders;
-    private List<GridViewRowBean> mRightHeaders;
-    private List<GridViewRowBean> mLeftRowDatas;
-    private List<GridViewRowBean> mRightRowDatas;
+    private List<TableViewRowBean> mHeaders;
+    private List<TableViewRowBean> mRowDatas;
+    private List<TableViewRowBean> mLeftHeaders;
+    private List<TableViewRowBean> mRightHeaders;
+    private List<TableViewRowBean> mLeftRowDatas;
+    private List<TableViewRowBean> mRightRowDatas;
     private boolean mAllRowExpandFlag;
     private boolean mWrapRowFlag;
     private boolean mAutoFits;
@@ -81,7 +81,7 @@ public final class CustomizedGridView {
     /**
      * Private Constructor to insure WrapGridView can't be initiated the default way
      */
-    CustomizedGridView(Builder builder) {
+    CustomizedTableView(Builder builder) {
         this.mContext = builder.mContext;
         this.mRootView = builder.mRootView;
         this.mViewId = builder.mViewId;
@@ -101,16 +101,16 @@ public final class CustomizedGridView {
         this.prevSetting();
 
 
-        mGridViewLayout = (CustomizedGridViewLayout) mRootView.findViewById(mViewId);
+        mGridViewLayout = (CustomizedTableViewLayout) mRootView.findViewById(mViewId);
         mGridViewLayout.setGridView(this);
         // 左抬头
         mHeaderListLeft = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_left_rows);
         if (!mWrapRowFlag)
         {
-            width = (int)(mLeftHeaderTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
+            width = (int)(mLeftHeaderTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedTableView.CELL_FONT_SIZE));
             mHeaderListLeft.setLayoutParams(new LinearLayout.LayoutParams(width, LinearLayoutCompat.LayoutParams.WRAP_CONTENT));
-            GridViewHeaderListAdapter gridViewHeaderLeftAdapter =
-                    new GridViewHeaderListAdapter(
+            TableViewHeaderListAdapter gridViewHeaderLeftAdapter =
+                    new TableViewHeaderListAdapter(
                             mContext,
                             mLeftHeaders,
                             mLeftRowDatas,
@@ -128,8 +128,8 @@ public final class CustomizedGridView {
 
         // 右抬头
         mHeaderListRight = (ListView) mGridViewLayout.findViewById(R.id.grid_view_header_right_rows);
-        GridViewHeaderListAdapter gridViewHeaderRightAdapter =
-                new GridViewHeaderListAdapter(
+        TableViewHeaderListAdapter gridViewHeaderRightAdapter =
+                new TableViewHeaderListAdapter(
                         mContext,
                         mRightHeaders,
                         mRightRowDatas,
@@ -138,12 +138,12 @@ public final class CustomizedGridView {
                         mRightHeaderTotalColumnSpan,
                         mAllRowExpandFlag,
                         mShortTextFlag, null);
-        gridViewHeaderRightAdapter.setOnGridViewDataSortListener(new GridViewHeaderListAdapter.OnGridViewDataSortListener()
+        gridViewHeaderRightAdapter.setOnGridViewDataSortListener(new TableViewHeaderListAdapter.OnGridViewDataSortListener()
         {
             @Override
-            public void onDataSort(int position, int offset, GridViewBeanComparator.ORDER_TYPE orderType) {
+            public void onDataSort(int position, int offset, TableViewBeanComparator.ORDER_TYPE orderType) {
                 // 数据排序
-                Collections.sort(mRowDatas, new GridViewBeanComparator(true, position+offset, orderType));
+                Collections.sort(mRowDatas, new TableViewBeanComparator(true, position+offset, orderType));
 
                 // 行号设定
                 resetFixRowNumbers();
@@ -151,7 +151,7 @@ public final class CustomizedGridView {
                 // 数据重新分割
                 fixColumnSetting();
                 mGridViewDataRightAdapter.setDataRows(mRightRowDatas);
-                final GridViewDataListAdapter rightAdapter = mGridViewDataRightAdapter;
+                final TableViewDataListAdapter rightAdapter = mGridViewDataRightAdapter;
                 Handler rightHandler= new Handler();
                 rightHandler.post(new Runnable(){
                     @Override
@@ -162,7 +162,7 @@ public final class CustomizedGridView {
                 if (!mWrapRowFlag)
                 {
                     mGridViewDataLeftAdapter.setDataRows(mLeftRowDatas);
-                    final GridViewDataListAdapter leftAdapter = mGridViewDataLeftAdapter;
+                    final TableViewDataListAdapter leftAdapter = mGridViewDataLeftAdapter;
 
                     Handler leftHandler= new Handler();
                     leftHandler.post(new Runnable(){
@@ -180,7 +180,7 @@ public final class CustomizedGridView {
         if (!mWrapRowFlag)
         {
             // 整行显示时，全部加载
-            height = (int)(mLeftRowDatas.size() * CustomizedGridView.DATA_ROW_HEIGHT);
+            height = (int)(mLeftRowDatas.size() * CustomizedTableView.DATA_ROW_HEIGHT);
             mDataListLeft.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 
             // 逐行加载
@@ -196,7 +196,7 @@ public final class CustomizedGridView {
 //                    }
 //                }
 //            });
-            mGridViewDataLeftAdapter = new GridViewDataListAdapter(this.mContext,
+            mGridViewDataLeftAdapter = new TableViewDataListAdapter(this.mContext,
                     mLeftHeaders,
                     mLeftRowDatas,
                     0,
@@ -281,7 +281,7 @@ public final class CustomizedGridView {
         if (!mWrapRowFlag)
         {
             // 整行显示时，全部加载
-            height = (int)(mRightRowDatas.size() * CustomizedGridView.DATA_ROW_HEIGHT);
+            height = (int)(mRightRowDatas.size() * CustomizedTableView.DATA_ROW_HEIGHT);
             mDataListRight.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 //            // 逐行加载
 //            int parentHeight = DisplayUtils.getDisplayHight(this.mContext);
@@ -304,7 +304,7 @@ public final class CustomizedGridView {
         }
         if (mRightRowDatas != null)
         {
-            mGridViewDataRightAdapter = new GridViewDataListAdapter(this.mContext,
+            mGridViewDataRightAdapter = new TableViewDataListAdapter(this.mContext,
                     mRightHeaders,
                     mRightRowDatas,
                     mFixColumnCount,
@@ -367,7 +367,7 @@ public final class CustomizedGridView {
             mRightDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_right_v_scroll);
             mLeftDataVScroll = (VScrollView) mGridViewLayout.findViewById(R.id.grid_view_data_left_v_scroll);
             // 设定高度、宽度
-            width = (int)(mLeftDataTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedGridView.CELL_FONT_SIZE));
+            width = (int)(mLeftDataTotalColumnSpan * DisplayUtils.getDisplayFontPx(CustomizedTableView.CELL_FONT_SIZE));
             mLeftDataVScroll.setLayoutParams(new LinearLayout.LayoutParams(width, ViewGroup.LayoutParams.MATCH_PARENT));
 
 
@@ -436,28 +436,28 @@ public final class CustomizedGridView {
 
         for (int i=0; i< this.mRowDatas.size(); i++)
         {
-            GridViewRowBean row = this.mRowDatas.get(i);
+            TableViewRowBean row = this.mRowDatas.get(i);
             String id = "dataCol" + i;
             String value = String.valueOf(i + 1);
-            GridViewCellBean cell = new GridViewCellBean(id, value);
+            TableViewCellBean cell = new TableViewCellBean(id, value);
             this.mRowDatas.get(i).getColumnCells().add(0, cell);
         }
         for (int i=0; i< this.mHeaders.size(); i++)
         {
             if (i == 0)
             {
-                GridViewRowBean row = this.mHeaders.get(i);
+                TableViewRowBean row = this.mHeaders.get(i);
                 String id = "headerCol" + i;
                 String value = " No. ";
-                GridViewCellBean cell = new GridViewCellBean(id, value);
+                TableViewCellBean cell = new TableViewCellBean(id, value);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
             else
             {
-                GridViewRowBean row = this.mHeaders.get(i);
+                TableViewRowBean row = this.mHeaders.get(i);
                 String id = "headerCol" + i;
                 String value = "";
-                GridViewCellBean cell = new GridViewCellBean(id, value);
+                TableViewCellBean cell = new TableViewCellBean(id, value);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
         }
@@ -496,18 +496,18 @@ public final class CustomizedGridView {
                 // 非折行时容器定宽显示
                 for(int i=0; i< initColLength.length; i++)
                 {
-                    mTotalColumnSpan += initColLength[i] + CustomizedGridView.CELL_BLANK_LENGTH;
+                    mTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
                     if (mFixColumnCount > 0)
                     {
                         if (i < mFixColumnCount)
                         {
-                            mLeftHeaderTotalColumnSpan += initColLength[i] + CustomizedGridView.CELL_BLANK_LENGTH;
-                            mLeftDataTotalColumnSpan += initColLength[i] + CustomizedGridView.CELL_BLANK_LENGTH;
+                            mLeftHeaderTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
+                            mLeftDataTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
                         }
                         else
                         {
-                            mRightHeaderTotalColumnSpan += initColLength[i] + CustomizedGridView.CELL_BLANK_LENGTH;
-                            mRightDataTotalColumnSpan += initColLength[i] + CustomizedGridView.CELL_BLANK_LENGTH;
+                            mRightHeaderTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
+                            mRightDataTotalColumnSpan += initColLength[i] + CustomizedTableView.CELL_BLANK_LENGTH;
                         }
                     }
                     else
@@ -536,15 +536,15 @@ public final class CustomizedGridView {
             return;
         }
 
-        mLeftHeaders = new ArrayList<GridViewRowBean>();
-        mRightHeaders = new ArrayList<GridViewRowBean>();
-        mLeftRowDatas = new ArrayList<GridViewRowBean>();
-        mRightRowDatas = new ArrayList<GridViewRowBean>();
+        mLeftHeaders = new ArrayList<TableViewRowBean>();
+        mRightHeaders = new ArrayList<TableViewRowBean>();
+        mLeftRowDatas = new ArrayList<TableViewRowBean>();
+        mRightRowDatas = new ArrayList<TableViewRowBean>();
 
         for (int j=0; j< this.mHeaders.size(); j++)
         {
-            GridViewRowBean row = new GridViewRowBean();
-            row.setColumnCells(new ArrayList<GridViewCellBean>());
+            TableViewRowBean row = new TableViewRowBean();
+            row.setColumnCells(new ArrayList<TableViewCellBean>());
             row.setId(this.mHeaders.get(j).getId());
             row.setRowNumber(this.mHeaders.get(j).getRowNumber());
             mLeftHeaders.add(row);
@@ -556,8 +556,8 @@ public final class CustomizedGridView {
 
         for (int j=0; j< this.mRowDatas.size(); j++)
         {
-            GridViewRowBean row = new GridViewRowBean();
-            row.setColumnCells(new ArrayList<GridViewCellBean>());
+            TableViewRowBean row = new TableViewRowBean();
+            row.setColumnCells(new ArrayList<TableViewCellBean>());
             row.setId(this.mRowDatas.get(j).getId());
             row.setRowNumber(this.mRowDatas.get(j).getRowNumber());
             mLeftRowDatas.add(row);
@@ -569,8 +569,8 @@ public final class CustomizedGridView {
 
         for(int j=0; j<this.mHeaders.size(); j++)
         {
-            GridViewRowBean row = new GridViewRowBean();
-            row.setColumnCells(new ArrayList<GridViewCellBean>());
+            TableViewRowBean row = new TableViewRowBean();
+            row.setColumnCells(new ArrayList<TableViewCellBean>());
             row.setId(this.mHeaders.get(j).getId());
             row.setRowNumber(this.mHeaders.get(j).getRowNumber());
             mRightHeaders.add(row);
@@ -582,8 +582,8 @@ public final class CustomizedGridView {
 
         for(int j=0; j<this.mRowDatas.size(); j++)
         {
-            GridViewRowBean row = new GridViewRowBean();
-            row.setColumnCells(new ArrayList<GridViewCellBean>());
+            TableViewRowBean row = new TableViewRowBean();
+            row.setColumnCells(new ArrayList<TableViewCellBean>());
             row.setId(this.mRowDatas.get(j).getId());
             row.setRowNumber(this.mRowDatas.get(j).getRowNumber());
             mRightRowDatas.add(row);
@@ -595,7 +595,7 @@ public final class CustomizedGridView {
 
     }
 
-    private int[] calculateColumnTextLength(List<GridViewRowBean> rowHeaders, List<GridViewRowBean> rowDatas)
+    private int[] calculateColumnTextLength(List<TableViewRowBean> rowHeaders, List<TableViewRowBean> rowDatas)
     {
         if (rowHeaders == null || rowHeaders.size() == 0)
         {
@@ -650,9 +650,9 @@ public final class CustomizedGridView {
      * 设定各单元格行列值
      * @param rowDatas
      */
-    private void calculateRowColSetting(List<GridViewRowBean> rowDatas) {
+    private void calculateRowColSetting(List<TableViewRowBean> rowDatas) {
         for (int k = 0; k < rowDatas.size(); k++) {
-            List<GridViewCellBean> cells = rowDatas.get(k).getColumnCells();
+            List<TableViewCellBean> cells = rowDatas.get(k).getColumnCells();
             for(int i=0; i< cells.size(); i++)
             {
                 cells.get(i).setRowNumber(k);
@@ -665,7 +665,7 @@ public final class CustomizedGridView {
      * 计算列宽
      * @param rowDatas
      */
-    private void calculateColSpan(List<GridViewRowBean> headers, List<GridViewRowBean> rowDatas, int[] lengthDatas)
+    private void calculateColSpan(List<TableViewRowBean> headers, List<TableViewRowBean> rowDatas, int[] lengthDatas)
     {
         if (lengthDatas == null)
         {
@@ -673,7 +673,7 @@ public final class CustomizedGridView {
         }
         for (int k=0; k< rowDatas.size(); k++)
         {
-            List<GridViewCellBean> cells = rowDatas.get(k).getColumnCells();
+            List<TableViewCellBean> cells = rowDatas.get(k).getColumnCells();
             int colSpan = 0;
             boolean newLine = true;
             for(int i=0; i< cells.size(); i++)
@@ -682,7 +682,7 @@ public final class CustomizedGridView {
                 int headerSpan = 0;
                 if (!mWrapRowFlag)
                 {
-                    span = lengthDatas[i] + CustomizedGridView.CELL_BLANK_LENGTH;
+                    span = lengthDatas[i] + CustomizedTableView.CELL_BLANK_LENGTH;
                 }
                 else
                 {
@@ -703,7 +703,7 @@ public final class CustomizedGridView {
                     int nextHeaderSpan = 0;
                     if (!mWrapRowFlag)
                     {
-                        nextSpan = lengthDatas[i + 1] + CustomizedGridView.CELL_BLANK_LENGTH;
+                        nextSpan = lengthDatas[i + 1] + CustomizedTableView.CELL_BLANK_LENGTH;
                     }
                     else
                     {
@@ -741,7 +741,7 @@ public final class CustomizedGridView {
         }
         for(int i=0; i<headers.size(); i++)
         {
-            List<GridViewCellBean> cells = headers.get(i).getColumnCells();
+            List<TableViewCellBean> cells = headers.get(i).getColumnCells();
             for(int j=0; j< cells.size(); j++)
             {
                 cells.get(j).setColSpan(rowDatas.get(0).getColumnCells().get(j).getColSpan());
@@ -749,7 +749,7 @@ public final class CustomizedGridView {
         }
     }
 
-    public void setOnLoadCompleteListener(CustomizedGridViewLayout.OnLoadCompleteListener listener)
+    public void setOnLoadCompleteListener(CustomizedTableViewLayout.OnLoadCompleteListener listener)
     {
         if (this.mGridViewLayout != null)
         {
@@ -760,8 +760,8 @@ public final class CustomizedGridView {
         private Activity mContext;
         private View mRootView;
         private final int mViewId;
-        private List<GridViewRowBean> mHeaders;
-        private List<GridViewRowBean> mRowDatas;
+        private List<TableViewRowBean> mHeaders;
+        private List<TableViewRowBean> mRowDatas;
         private boolean mAllRowExpandFlag;
         private boolean mWrapRowFlag;
         private boolean mAutoFits;
@@ -780,12 +780,12 @@ public final class CustomizedGridView {
             this.initDefaultValues();
         }
 
-        public Builder headers(List<GridViewRowBean> headers) {
+        public Builder headers(List<TableViewRowBean> headers) {
             mHeaders = headers;
             return this;
         }
 
-        public Builder rowDatas(List<GridViewRowBean> rowDatas) {
+        public Builder rowDatas(List<TableViewRowBean> rowDatas) {
             this.mRowDatas = rowDatas;
             return this;
         }
@@ -811,10 +811,10 @@ public final class CustomizedGridView {
         }
 
         /**
-         * @return Instance of {@link CustomizedGridView} initiated with builder settings
+         * @return Instance of {@link CustomizedTableView} initiated with builder settings
          */
-        public CustomizedGridView build() {
-            CustomizedGridView gridView = new CustomizedGridView(this);
+        public CustomizedTableView build() {
+            CustomizedTableView gridView = new CustomizedTableView(this);
             gridView.loadGridView();
             return gridView;
         }
@@ -856,18 +856,18 @@ public final class CustomizedGridView {
 
     private static class DateHandler extends Handler {
 
-        private final WeakReference<CustomizedGridView> mWrapGridView;
+        private final WeakReference<CustomizedTableView> mWrapGridView;
         public Object data = null;
         public boolean immediate = true;
 
-        public DateHandler(CustomizedGridView wrapGridView, Object defaultData) {
+        public DateHandler(CustomizedTableView wrapGridView, Object defaultData) {
             this.mWrapGridView = new WeakReference<>(wrapGridView);
             this.data = defaultData;
         }
 
         @Override
         public void handleMessage(Message msg) {
-            CustomizedGridView gridView = mWrapGridView.get();
+            CustomizedTableView gridView = mWrapGridView.get();
             if (gridView != null) {
                 gridView.mLoading = false;
 

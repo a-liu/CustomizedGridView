@@ -1,11 +1,10 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.gridview;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.View;
 
 /**
  * Created by liu.jianfei on 2017/12/20.

@@ -1,4 +1,4 @@
-package com.liu.customizedgridview.activity;
+package com.liu.customized.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -6,16 +6,16 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 
-import com.liu.customizedgridview.R;
-import com.liu.customizedgridview.gridview.CustomizedGridView;
-import com.liu.customizedgridview.gridview.CustomizedGridViewLayout;
-import com.liu.customizedgridview.gridview.GridViewCellBean;
-import com.liu.customizedgridview.gridview.GridViewRowBean;
+import com.liu.customized.R;
+import com.liu.customized.gridview.CustomizedGridView;
+import com.liu.customized.gridview.CustomizedGridViewLayout;
+import com.liu.customized.gridview.GridViewCellBean;
+import com.liu.customized.gridview.GridViewRowBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GridViewActivity extends AppCompatActivity {
+public class TableViewActivity extends AppCompatActivity {
     private List<GridViewRowBean> rowHeaders = new ArrayList<>();
     private List<GridViewRowBean> rowDatas = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class GridViewActivity extends AppCompatActivity {
             {
                 int colIndex = j+1;
                 GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
-//                GridViewCellBean cellBean = new GridViewCellBean("col" + colIndex, String.format("%d%d:%s",rowIndex, colIndex, bodyValues[j]));
+//                TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex, String.format("%d%d:%s",rowIndex, colIndex, bodyValues[j]));
                 cellBean.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
                 rowCells.add(cellBean);
             }

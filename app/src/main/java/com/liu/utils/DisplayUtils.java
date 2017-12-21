@@ -1,4 +1,4 @@
-package com.liu.customizedgridview.utils;
+package com.liu.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;

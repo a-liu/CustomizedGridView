@@ -1,4 +1,4 @@
-package com.liu.customizedgridview.gridview;
+package com.liu.customized.table;
 
 import android.app.Activity;
 import android.support.v7.widget.LinearLayoutCompat;
@@ -13,18 +13,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liu.customizedgridview.R;
+import com.liu.customized.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRowAdapter.ViewHolder> {
-    private GridViewDataListAdapter.DISPLAY_ROW_MEMBER mDisplayFlag;
-    private List<GridViewCellBean> mDatas;
+public class TableViewDataRowAdapter extends RecyclerView.Adapter<TableViewDataRowAdapter.ViewHolder> {
+    private TableViewDataListAdapter.DISPLAY_ROW_MEMBER mDisplayFlag;
+    private List<TableViewCellBean> mDatas;
     private boolean isSelected = false;
 
-    private List<GridViewCellBean> selectList;
+    private List<TableViewCellBean> selectList;
 
     private boolean mShortTextFlag;
     private Activity mContext;
@@ -32,7 +32,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     private int mFirstRowColumnCount;
     private boolean mWrapRowFlag;
     private OnGridViewRowCellActionListener mOnGridViewRowCellActionListener;
-    private List<GridViewCellBean> mHeaders;
+    private List<TableViewCellBean> mHeaders;
     private float xDown,yDown, xUp;
     private boolean isLongClickModule = false;
     private boolean isLongClicking = false;
@@ -41,11 +41,11 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     {
         mOnGridViewRowCellActionListener = listener;
     }
-    public void setColumnDatas(List<GridViewCellBean> datas)
+    public void setColumnDatas(List<TableViewCellBean> datas)
     {
         this.mDatas = datas;
     }
-    public GridViewDataRowAdapter(Activity context, int totalSpan, int fixColumnCount, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
+    public TableViewDataRowAdapter(Activity context, int totalSpan, int fixColumnCount, List<TableViewCellBean> headers, List<TableViewCellBean> cellList, boolean wrapRowFlag, int initColumnCount, boolean shortText) {
         this.mDatas = cellList;
         this.mHeaders = headers;
         this.mContext = context;
@@ -54,11 +54,11 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         this.mDisplayColumnCount = initColumnCount;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
-        this.mDisplayFlag = GridViewDataListAdapter.DISPLAY_ROW_MEMBER.COLUMN;
+        this.mDisplayFlag = TableViewDataListAdapter.DISPLAY_ROW_MEMBER.COLUMN;
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
     }
-    public GridViewDataRowAdapter(Activity context, int totalSpan,  int fixColumnCount, List<GridViewCellBean> headers, List<GridViewCellBean> cellList, boolean wrapRowFlag, boolean allRowExpandFlag, boolean shortText) {
+    public TableViewDataRowAdapter(Activity context, int totalSpan, int fixColumnCount, List<TableViewCellBean> headers, List<TableViewCellBean> cellList, boolean wrapRowFlag, boolean allRowExpandFlag, boolean shortText) {
         this.mDatas = cellList;
         this.mFixColumnCount = fixColumnCount;
         this.mHeaders = headers;
@@ -66,7 +66,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         this.mWrapRowFlag = wrapRowFlag;
         selectList = new ArrayList<>();
         this.mShortTextFlag = shortText;
-        this.mDisplayFlag = GridViewDataListAdapter.DISPLAY_ROW_MEMBER.ROW;
+        this.mDisplayFlag = TableViewDataListAdapter.DISPLAY_ROW_MEMBER.ROW;
         // 计算行列数
         this.mFirstRowColumnCount = calculateFirstRowColumnCount(totalSpan, cellList);
 
@@ -88,7 +88,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
     }
 
     @Override
-    public GridViewDataRowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TableViewDataRowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = null;
 //        if (!mWrapRowFlag)
 //        {
@@ -150,7 +150,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
 //    }
 
     @Override
-    public void onBindViewHolder(final GridViewDataRowAdapter.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final TableViewDataRowAdapter.ViewHolder holder, final int position) {
         if (this.mShortTextFlag)
         {
             holder.mTextView.setText(mDatas.get(position).getShortText());
@@ -186,7 +186,7 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
                                 mDisplayColumnCount = mFirstRowColumnCount;
                             }
 
-                            mOnGridViewRowCellActionListener.onFirstRowDoubleClicked(GridViewDataRowAdapter.this, v);
+                            mOnGridViewRowCellActionListener.onFirstRowDoubleClicked(TableViewDataRowAdapter.this, v);
                         }
                         mCurrentDownEvent = MotionEvent.obtain(event);
                     } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -316,11 +316,11 @@ public class GridViewDataRowAdapter extends RecyclerView.Adapter<GridViewDataRow
         }
     }
 
-    public List<GridViewCellBean> getSelectData(){
+    public List<TableViewCellBean> getSelectData(){
         return selectList;
     }
 
-    private int calculateFirstRowColumnCount(int totalSpan, List<GridViewCellBean> cells)
+    private int calculateFirstRowColumnCount(int totalSpan, List<TableViewCellBean> cells)
     {
         int result = 0;
         // 计算行列数
