@@ -103,6 +103,7 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
         textView.setLayoutParams(textViewParams);
         int height = mTableFieldHeight[rowIndex];
         int width = mTableFieldWidth[colIndex];
+
         textViewParams.height = DisplayUtils.dip2px(mContext, height);
         textViewParams.width = DisplayUtils.dip2px(mContext, width);
         textView.setLayoutParams(textViewParams);

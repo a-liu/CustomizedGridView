@@ -12,7 +12,7 @@ import android.widget.HorizontalScrollView;
  */
 
 public class HScrollView extends HorizontalScrollView {
-    private float mSpeedRate = 0.25F;
+    private float mSpeedRate = 0.5F;
     public void setSpeedRate(float rate){
         mSpeedRate = rate;
     }
@@ -54,8 +54,13 @@ public class HScrollView extends HorizontalScrollView {
 
     @Override
     public void fling(int velocityX) {
-        int speed = (int)(velocityX /8);
+        int speed = (int)(velocityX / mSpeedRate);
         super.fling(speed);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        return super.onTouchEvent(ev);
     }
 
     @Override

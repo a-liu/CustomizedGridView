@@ -411,22 +411,43 @@ public final class CustomizedTableView {
             mTableFieldHeight = new int[rowCount];
         }
         int[] columnLength = calculateColumnTextLength(mHeaders, mRowDatas);
-        for(int j=0; j < columnLength.length; j++)
+//        for(int j=0; j < columnLength.length; j++)
+//        {
+//            String text = String.format("%"+ columnLength[j] + "s","X").replace(" ", "X");
+//            TextView textView = getVisualTableTextView(text,
+//                    this.mHeaders.get(0).getColumnCells().get(j).getGravity());
+//            int width = measureTextWidth(textView);
+//            int height = measureTextHeight(textView);
+//            if (mTableFieldWidth[j] < width)
+//            {
+//                mTableFieldWidth[j] = width;
+//            }
+//            if (mTableFieldHeight[0] < height)
+//            {
+//                mTableFieldHeight[0] = height;
+//            }
+//        }
+
+        for (int i=0; i< this.mHeaders.size(); i++)
         {
-            String text = String.format("%"+ columnLength[j] + "s","X").replace(" ", "X");
-            TextView textView = getVisualTableTextView(text,
-                    this.mHeaders.get(0).getColumnCells().get(j).getGravity());
-            int width = measureTextWidth(textView);
-            int height = measureTextHeight(textView);
-            if (mTableFieldWidth[j] < width)
+            for(int j=0; j < this.mHeaders.get(i).getColumnCells().size(); j++)
             {
-                mTableFieldWidth[j] = width;
-            }
-            if (mTableFieldHeight[0] < height)
-            {
-                mTableFieldHeight[0] = height;
+                TextView textView = getVisualTableTextView(
+                        this.mHeaders.get(i).getColumnCells().get(j).getText() + "   ",
+                        this.mHeaders.get(i).getColumnCells().get(j).getGravity());
+                int width = measureTextWidth(textView);
+                int height = measureTextHeight(textView);
+                if (mTableFieldWidth[j] < width)
+                {
+                    mTableFieldWidth[j] = width;
+                }
+                if (mTableFieldHeight[i] < height)
+                {
+                    mTableFieldHeight[i] = height;
+                }
             }
         }
+
         for(int j=0; mRowDatas != null && j < columnLength.length; j++)
         {
             String text = String.format("%"+ columnLength[j] + "s","X").replace(" ", "X");
@@ -540,7 +561,6 @@ public final class CustomizedTableView {
                 TableViewConstants.CELL_MARGIN_TOP,
                 TableViewConstants.CELL_MARGIN_RIGHT,
                 TableViewConstants.CELL_MARGIN_BOTTOM);
-//                textView.setBackground(ContextCompat.getDrawable(mContext,R.drawable.table_header_label_bg));
         textView.setBackgroundResource(R.drawable.table_header_label_bg);
         textView.setLayoutParams(textViewParams);
         textView.setPadding(TableViewConstants.CELL_PADDING_LEFT,
