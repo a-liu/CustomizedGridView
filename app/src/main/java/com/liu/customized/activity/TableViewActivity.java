@@ -76,7 +76,7 @@ public class TableViewActivity extends AppCompatActivity {
                 int colIndex = j+1;
                 TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
 //                TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex, String.format("%d%d:%s",rowIndex, colIndex, bodyValues[j]));
-                cellBean.setGravity(Gravity.BOTTOM);
+                cellBean.setGravity(Gravity.CENTER + Gravity.LEFT);
                 rowCells.add(cellBean);
             }
 
@@ -90,7 +90,8 @@ public class TableViewActivity extends AppCompatActivity {
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
                     .wrapRowFlag(false)
-                    .minFieldHeight(70)
+                    .minFieldHeight(50)
+                    .maxFieldHeight(50)
                     .maxFieldWidth(200)
                     .fixColumnCount(2)
                     .build();

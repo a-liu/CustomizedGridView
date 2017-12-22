@@ -95,7 +95,7 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
                 TableViewConstants.CELL_MARGIN_TOP,
                 TableViewConstants.CELL_MARGIN_RIGHT,
                 TableViewConstants.CELL_MARGIN_BOTTOM);
-        textView.setBackgroundResource(R.drawable.table_content_label_bg);
+        textView.setBackgroundResource(R.drawable.table_content_text_bg);
         textView.setPadding(TableViewConstants.CELL_PADDING_LEFT,
                 TableViewConstants.CELL_PADDING_TOP,
                 TableViewConstants.CELL_PADDING_RIGHT,

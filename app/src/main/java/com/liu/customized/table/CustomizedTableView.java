@@ -136,14 +136,14 @@ public final class CustomizedTableView {
                                     String text = view.getText() + "";
                                     if (text.endsWith(TableViewConstants.HEADER_SORT_TEXT_ASC))
                                     {
-                                        text = text.substring(0, text.length() - 2);
+                                        text = text.substring(0, text.length() - 1);
                                         text += TableViewConstants.HEADER_SORT_TEXT_DESC;
                                         view.setText(text);
                                         mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
                                     }
                                     else
                                     {
-                                        text = text.substring(0, text.length() - 2);
+                                        text = text.substring(0, text.length() - 1);
                                         text += TableViewConstants.HEADER_SORT_TEXT_ASC;
                                         view.setText(text);
                                         mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
@@ -186,14 +186,14 @@ public final class CustomizedTableView {
                                     String text = view.getText() + "";
                                     if (text.endsWith(TableViewConstants.HEADER_SORT_TEXT_ASC))
                                     {
-                                        text = text.substring(0, text.length() - 2);
+                                        text = text.substring(0, text.length() - 1);
                                         text += TableViewConstants.HEADER_SORT_TEXT_DESC;
                                         view.setText(text);
                                         mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
                                     }
                                     else
                                     {
-                                        text = text.substring(0, text.length() - 2);
+                                        text = text.substring(0, text.length() - 1);
                                         text += TableViewConstants.HEADER_SORT_TEXT_ASC;
                                         view.setText(text);
                                         mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
@@ -408,47 +408,84 @@ public final class CustomizedTableView {
         }
         if (mTableFieldHeight == null)
         {
-            mTableFieldHeight = new int[this.mHeaders.size() + this.mRowDatas.size()];
+            mTableFieldHeight = new int[rowCount];
         }
-        for (int i=0; i< this.mHeaders.size(); i++)
+        int[] columnLength = calculateColumnTextLength(mHeaders, mRowDatas);
+        for(int j=0; j < columnLength.length; j++)
         {
-            for(int j=0; j<this.mHeaders.get(i).getColumnCells().size(); j++)
+            String text = String.format("%"+ columnLength[j] + "s","X").replace(" ", "X");
+            TextView textView = getVisualTableTextView(text,
+                    this.mHeaders.get(0).getColumnCells().get(j).getGravity());
+            int width = measureTextWidth(textView);
+            int height = measureTextHeight(textView);
+            if (mTableFieldWidth[j] < width)
             {
-                TextView textView = getVisualTableTextView(
-                        this.mHeaders.get(i).getColumnCells().get(j).getText() + "   ",
-                        this.mHeaders.get(i).getColumnCells().get(j).getGravity());
-                int width = measureTextWidth(textView);
-                int height = measureTextHeight(textView);
-                if (mTableFieldWidth[j] < width)
-                {
-                    mTableFieldWidth[j] = width;
-                }
-                if (mTableFieldHeight[i] < height)
-                {
-                    mTableFieldHeight[i] = height;
-                }
+                mTableFieldWidth[j] = width;
+            }
+            if (mTableFieldHeight[0] < height)
+            {
+                mTableFieldHeight[0] = height;
             }
         }
-
-        for (int i=0; i< this.mRowDatas.size(); i++)
+        for(int j=0; mRowDatas != null && j < columnLength.length; j++)
         {
-            for(int j=0; j<this.mRowDatas.get(i).getColumnCells().size(); j++)
+            String text = String.format("%"+ columnLength[j] + "s","X").replace(" ", "X");
+            TextView textView = getVisualTableTextView(text,
+            this.mRowDatas.get(0).getColumnCells().get(j).getGravity());
+            int width = measureTextWidth(textView);
+            int height = measureTextHeight(textView);
+            if (mTableFieldWidth[j] < width)
             {
-                TextView textView = getVisualTableTextView(
-                        this.mRowDatas.get(i).getColumnCells().get(j).getText(),
-                        this.mRowDatas.get(i).getColumnCells().get(j).getGravity());
-                int width = measureTextWidth(textView);
-                int height = measureTextHeight(textView);
-                if (mTableFieldWidth[j] < width)
-                {
-                    mTableFieldWidth[j] = width;
-                }
-                if (mTableFieldHeight[i + mFixRowCount] < height)
-                {
-                    mTableFieldHeight[i + mFixRowCount] = height;
-                }
+                mTableFieldWidth[j] = width;
+            }
+            if (mTableFieldHeight[1] < height)
+            {
+                mTableFieldHeight[1] = height;
             }
         }
+        for(int i=2; i<mTableFieldHeight.length; i++)
+        {
+            mTableFieldHeight[i] = mTableFieldHeight[1];
+        }
+//        for (int i=0; i< this.mHeaders.size(); i++)
+//        {
+//            for(int j=0; j < this.mHeaders.get(i).getColumnCells().size(); j++)
+//            {
+//                TextView textView = getVisualTableTextView(
+//                        this.mHeaders.get(i).getColumnCells().get(j).getText() + "   ",
+//                        this.mHeaders.get(i).getColumnCells().get(j).getGravity());
+//                int width = measureTextWidth(textView);
+//                int height = measureTextHeight(textView);
+//                if (mTableFieldWidth[j] < width)
+//                {
+//                    mTableFieldWidth[j] = width;
+//                }
+//                if (mTableFieldHeight[i] < height)
+//                {
+//                    mTableFieldHeight[i] = height;
+//                }
+//            }
+//        }
+//
+//        for (int i=0; i< this.mRowDatas.size(); i++)
+//        {
+//            for(int j=0; j<this.mRowDatas.get(i).getColumnCells().size(); j++)
+//            {
+//                TextView textView = getVisualTableTextView(
+//                        this.mRowDatas.get(i).getColumnCells().get(j).getText(),
+//                        this.mRowDatas.get(i).getColumnCells().get(j).getGravity());
+//                int width = measureTextWidth(textView);
+//                int height = measureTextHeight(textView);
+//                if (mTableFieldWidth[j] < width)
+//                {
+//                    mTableFieldWidth[j] = width;
+//                }
+//                if (mTableFieldHeight[i + mFixRowCount] < height)
+//                {
+//                    mTableFieldHeight[i + mFixRowCount] = height;
+//                }
+//            }
+//        }
     }
 
     private TextView getVisualTableTextView(String text, int gravity) {

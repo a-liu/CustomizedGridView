@@ -54,7 +54,7 @@ public class HScrollView extends HorizontalScrollView {
 
     @Override
     public void fling(int velocityX) {
-        int speed = (int)(velocityX * mSpeedRate);
+        int speed = (int)(velocityX /8);
         super.fling(speed);
     }
 
