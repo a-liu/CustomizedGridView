@@ -7,10 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 
 import com.liu.customized.R;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewDataBodyAdapter.ViewHolder> {
@@ -18,6 +21,26 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
     public void setScrollViewListener(HScrollView.ScrollViewListener listener)
     {
         this.mScrollViewListener = listener;
+    }
+    private VRecyclerView.OnScrollPositionToEndListener mOnScrollPositionToEndListener;
+    public void setOnScrollPositionToEndListener(VRecyclerView.OnScrollPositionToEndListener listener) {
+        mOnScrollPositionToEndListener = listener;
+    }
+
+    private TableViewDataBodyItemAdapter mLeftTableViewDataBodyItemAdapter;
+    private TableViewDataBodyItemAdapter mRightTableViewDataBodyItemAdapter;
+    public void notifyRowDataChanged()
+    {
+        if (mLeftTableViewDataBodyItemAdapter != null)
+        {
+            mLeftTableViewDataBodyItemAdapter.setRowDatas(mLeftRowDatas);
+            mLeftTableViewDataBodyItemAdapter.notifyDataSetChanged();
+        }
+        if (mRightTableViewDataBodyItemAdapter != null)
+        {
+            mRightTableViewDataBodyItemAdapter.setRowDatas(mRightRowDatas);
+            mRightTableViewDataBodyItemAdapter.notifyDataSetChanged();
+        }
     }
     private List<TableViewRowBean> mLeftRowDatas;
     private List<TableViewRowBean> mRightRowDatas;
@@ -78,26 +101,27 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
         LinearLayoutManager leftLayoutManager = new LinearLayoutManager(mContext);
         leftLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         holder.mDataLeftView.setLayoutManager(leftLayoutManager);
-        TableViewDataBodyItemAdapter leftAdapter =
-                new TableViewDataBodyItemAdapter(mContext,
-                        mFixRowCount,
-                        0,
-                        mLeftRowDatas,
-                        mTableFieldWidth,
-                        mTableFieldHeight);
-        holder.mDataLeftView.setAdapter(leftAdapter);
+        mLeftTableViewDataBodyItemAdapter =
+                    new TableViewDataBodyItemAdapter(mContext,
+                            mFixRowCount,
+                            0,
+                            mLeftRowDatas,
+                            mTableFieldWidth,
+                            mTableFieldHeight);
+            holder.mDataLeftView.setAdapter(mLeftTableViewDataBodyItemAdapter);
+
 
         LinearLayoutManager rightLayoutManager = new LinearLayoutManager(mContext);
         rightLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         holder.mDataRightView.setLayoutManager(rightLayoutManager);
-        TableViewDataBodyItemAdapter rightAdapter =
-                new TableViewDataBodyItemAdapter(mContext,
-                        mFixRowCount,
-                        mFixColumnCount,
-                        mRightRowDatas,
-                        mTableFieldWidth,
-                        mTableFieldHeight);
-        holder.mDataRightView.setAdapter(rightAdapter);
+        mRightTableViewDataBodyItemAdapter =
+                    new TableViewDataBodyItemAdapter(mContext,
+                            mFixRowCount,
+                            mFixColumnCount,
+                            mRightRowDatas,
+                            mTableFieldWidth,
+                            mTableFieldHeight);
+        holder.mDataRightView.setAdapter(mRightTableViewDataBodyItemAdapter);
 
         holder.mHorizontalScroller.setScrollViewListener(new HScrollView.ScrollViewListener() {
             @Override

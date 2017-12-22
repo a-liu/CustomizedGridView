@@ -51,12 +51,12 @@ android:orientation="vertical">
                         <!--</ListView>-->
                 </com.liu.customized.table.HScrollView>
         </LinearLayout>
-        <android.support.v7.widget.RecyclerView
+        <com.liu.customized.table.VRecyclerView
             android:id="@+id/customized_table_layout_body"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </android.support.v7.widget.RecyclerView>
+            android:layout_height="match_parent"
+            >
+        </com.liu.customized.table.VRecyclerView>
         <!--<LinearLayout-->
             <!--android:id="@+id/customized_table_layout_body"-->
             <!--android:layout_width="match_parent"-->

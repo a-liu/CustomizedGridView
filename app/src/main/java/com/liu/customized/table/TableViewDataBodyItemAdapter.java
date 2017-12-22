@@ -2,6 +2,8 @@ package com.liu.customized.table;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,6 +43,10 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
 
     }
 
+    public void setRowDatas(List<TableViewRowBean> rowDatas)
+    {
+        this.mRowDatas = rowDatas;
+    }
 
     @Override
     public TableViewDataBodyItemAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -76,13 +82,12 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
         textView.setText(text);
         if (gravity == Gravity.NO_GRAVITY)
         {
-            textView.setGravity(Gravity.TOP | Gravity.LEFT);
+            textView.setGravity(TableViewConstants.DEFAULT_CELL_GRAVITY);
         }
         else
         {
             textView.setGravity(gravity);
         }
-        textView.setGravity(Gravity.TOP | Gravity.LEFT);
         //设置布局
         LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -101,6 +106,11 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
         textViewParams.height = DisplayUtils.dip2px(mContext, height);
         textViewParams.width = DisplayUtils.dip2px(mContext, width);
         textView.setLayoutParams(textViewParams);
+        textView.setMaxLines(TableViewConstants.CELL_TEXT_MAX_LINE_COUNT);
+        if (TableViewConstants.CELL_TEXT_ELLIPSIZE)
+        {
+            textView.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
+        }
         return textView;
     }
 

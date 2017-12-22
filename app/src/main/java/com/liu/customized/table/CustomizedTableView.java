@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -61,7 +62,7 @@ public final class CustomizedTableView {
     private boolean mAutoFits;
     private boolean mShortTextFlag;
     private int mTotalColumnSpan;
-
+    private int mPageCount;
     private int mFixColumnCount;
     private int mFixRowCount;
     private int mMaxFieldWidth;
@@ -86,6 +87,7 @@ public final class CustomizedTableView {
         this.mAutoFits = builder.mAutoFits;
         this.mShortTextFlag = builder.mShortTextFlag;
         this.mFixColumnCount = builder.mFixColumnCount;
+        this.mPageCount = builder.mPageCount;
         this.mFixRowCount = builder.mFixRowCount;
         this.mMinFieldWidth = builder.mMinFieldWidth;
         this.mMinFieldHeight = builder.mMinFieldHeight;
@@ -115,8 +117,9 @@ public final class CustomizedTableView {
             layoutView.removeAllViews();
             for(int i=0; i<this.mLeftHeaders.size(); i++) {
                 for (int j=0;j<this.mLeftHeaders.get(i).getColumnCells().size(); j++) {
-                    TextView view = this.getActualTableHeaderTextView(
-                            this.mLeftHeaders.get(i).getColumnCells().get(j).getText(),
+                    final TextView view = this.getActualTableHeaderTextView(
+                            this.mLeftHeaders.get(i).getColumnCells().get(j).getText() +
+                                    TableViewConstants.HEADER_SORT_TEXT_ASC,
                             this.mLeftHeaders.get(i).getColumnCells().get(j).getGravity(),
                             i,
                             j);
@@ -130,19 +133,21 @@ public final class CustomizedTableView {
                                         && mCurrentDownEvent != null
                                         && isConsideredDoubleTap(mCurrentDownEvent,
                                         mPreviousUpEvent, event)) {
-//                                    if (holder.mAscTextView.getVisibility() == View.VISIBLE)
-//                                    {
-//                                        holder.mDescTextView.setVisibility(View.VISIBLE);
-//                                        holder.mAscTextView.setVisibility(View.GONE);
-//                                        mOnGridViewRowCellActionListener.onDataSort(GridViewHeaderRowAdapter.this, v, position, mFixColumnCount, GridViewBeanComparator.ORDER_TYPE.DESC);
-//                                    }
-//                                    else
-//                                    {
-//                                        holder.mDescTextView.setVisibility(View.GONE);
-//                                        holder.mAscTextView.setVisibility(View.VISIBLE);
-                                    mOnTableViewRowHeaderActionListener.onDataSort(colIndex, 0, TableViewBeanComparator.ORDER_TYPE.DESC);
-//                                    }
-
+                                    String text = view.getText() + "";
+                                    if (text.endsWith(TableViewConstants.HEADER_SORT_TEXT_ASC))
+                                    {
+                                        text = text.substring(0, text.length() - 2);
+                                        text += TableViewConstants.HEADER_SORT_TEXT_DESC;
+                                        view.setText(text);
+                                        mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
+                                    }
+                                    else
+                                    {
+                                        text = text.substring(0, text.length() - 2);
+                                        text += TableViewConstants.HEADER_SORT_TEXT_ASC;
+                                        view.setText(text);
+                                        mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
+                                    }
                                 }
                                 mCurrentDownEvent = MotionEvent.obtain(event);
                             } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -162,8 +167,9 @@ public final class CustomizedTableView {
             layoutView.removeAllViews();
             for(int i=0; i<this.mRightHeaders.size(); i++) {
                 for (int j=0;j<this.mRightHeaders.get(i).getColumnCells().size(); j++) {
-                    TextView view = this.getActualTableHeaderTextView(
-                            this.mRightHeaders.get(i).getColumnCells().get(j).getText(),
+                    final TextView view = this.getActualTableHeaderTextView(
+                            this.mRightHeaders.get(i).getColumnCells().get(j).getText() +
+                                    TableViewConstants.HEADER_SORT_TEXT_ASC,
                             this.mRightHeaders.get(i).getColumnCells().get(j).getGravity(),
                             i,
                             j + mFixColumnCount);
@@ -177,19 +183,21 @@ public final class CustomizedTableView {
                                         && mCurrentDownEvent != null
                                         && isConsideredDoubleTap(mCurrentDownEvent,
                                         mPreviousUpEvent, event)) {
-//                                    if (holder.mAscTextView.getVisibility() == View.VISIBLE)
-//                                    {
-//                                        holder.mDescTextView.setVisibility(View.VISIBLE);
-//                                        holder.mAscTextView.setVisibility(View.GONE);
-//                                        mOnGridViewRowCellActionListener.onDataSort(GridViewHeaderRowAdapter.this, v, position, mFixColumnCount, GridViewBeanComparator.ORDER_TYPE.DESC);
-//                                    }
-//                                    else
-//                                    {
-//                                        holder.mDescTextView.setVisibility(View.GONE);
-//                                        holder.mAscTextView.setVisibility(View.VISIBLE);
-                                    mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
-//                                    }
-
+                                    String text = view.getText() + "";
+                                    if (text.endsWith(TableViewConstants.HEADER_SORT_TEXT_ASC))
+                                    {
+                                        text = text.substring(0, text.length() - 2);
+                                        text += TableViewConstants.HEADER_SORT_TEXT_DESC;
+                                        view.setText(text);
+                                        mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
+                                    }
+                                    else
+                                    {
+                                        text = text.substring(0, text.length() - 2);
+                                        text += TableViewConstants.HEADER_SORT_TEXT_ASC;
+                                        view.setText(text);
+                                        mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
+                                    }
                                 }
                                 mCurrentDownEvent = MotionEvent.obtain(event);
                             } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -203,9 +211,9 @@ public final class CustomizedTableView {
         }
 
         // 数据
-        if (mLeftRowDatas != null && this.mLeftRowDatas.size() > 0 )
+        if (mRowDatas != null && this.mRowDatas.size() > 0 )
         {
-            RecyclerView view = (RecyclerView)mGridViewLayout.findViewById(
+            final VRecyclerView view = (VRecyclerView)mGridViewLayout.findViewById(
                     R.id.customized_table_layout_body);
             LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -219,6 +227,41 @@ public final class CustomizedTableView {
                     mTableFieldWidth,
                     mTableFieldHeight);
             view.setAdapter(mDataBodyAdapter);
+            view.setOnScrollPositionToEndListener(new VRecyclerView.OnScrollPositionToEndListener() {
+                @Override
+                public void onScrollPositionToEnd() {
+                    if (mRowDatas.size() == mLeftRowDatas.size()){
+                        return;
+                    }
+                    if (mLeftRowDatas.size() / TableViewConstants.PER_PAGE_OF_ITEM_COUNT < mPageCount)
+                    {
+                        return;
+                    }
+
+
+                    (new Handler()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // 加载下一页数据
+                            mPageCount += 1;
+
+                            // 行号设定
+                            resetFixRowNumbers();
+
+                            // 数据重新分割
+                            fixColumnSetting();
+
+                            mDataBodyAdapter.setLeftRowDatas(mLeftRowDatas);
+                            mDataBodyAdapter.setRightRowDatas(mRightRowDatas);
+
+                            mDataBodyAdapter.notifyRowDataChanged();
+                        }
+                    }, 1000);
+
+                }
+            });
+
+
             // 水平滚动条
             final HScrollView hHeaderScrollView = (HScrollView)mGridViewLayout.findViewById(
                     R.id.table_header_right_h_scroll);
@@ -236,7 +279,7 @@ public final class CustomizedTableView {
         this.setmOnTableViewRowHeaderActionListener(new OnTableViewRowHeaderActionListener() {
             @Override
             public void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType) {
-// 数据排序
+                // 数据排序
                 Collections.sort(mRowDatas, new TableViewBeanComparator(true, position + positionOffset, orderType));
 
                 // 行号设定
@@ -302,7 +345,12 @@ public final class CustomizedTableView {
             }
         }
 
-        for (int j=0; j< this.mRowDatas.size(); j++)
+        int itemCount = TableViewConstants.PER_PAGE_OF_ITEM_COUNT * mPageCount;
+        if (itemCount > this.mRowDatas.size())
+        {
+            itemCount = this.mRowDatas.size();
+        }
+        for (int j=0; j< itemCount; j++)
         {
             TableViewRowBean row = new TableViewRowBean();
             row.setColumnCells(new ArrayList<TableViewCellBean>());
@@ -328,7 +376,7 @@ public final class CustomizedTableView {
             }
         }
 
-        for(int j=0; j<this.mRowDatas.size(); j++)
+        for(int j=0; j<itemCount; j++)
         {
             TableViewRowBean row = new TableViewRowBean();
             row.setColumnCells(new ArrayList<TableViewCellBean>());
@@ -367,7 +415,7 @@ public final class CustomizedTableView {
             for(int j=0; j<this.mHeaders.get(i).getColumnCells().size(); j++)
             {
                 TextView textView = getVisualTableTextView(
-                        this.mHeaders.get(i).getColumnCells().get(j).getText(),
+                        this.mHeaders.get(i).getColumnCells().get(j).getText() + "   ",
                         this.mHeaders.get(i).getColumnCells().get(j).getGravity());
                 int width = measureTextWidth(textView);
                 int height = measureTextHeight(textView);
@@ -409,7 +457,7 @@ public final class CustomizedTableView {
         textView.setText(text);
         if (gravity == Gravity.NO_GRAVITY)
         {
-            textView.setGravity(Gravity.CENTER);
+            textView.setGravity(Gravity.CENTER | Gravity.LEFT);
         }
         else
         {
@@ -425,6 +473,11 @@ public final class CustomizedTableView {
                 TableViewConstants.CELL_MARGIN_RIGHT,
                 TableViewConstants.CELL_MARGIN_BOTTOM);
         textView.setLayoutParams(textViewParams);
+        textView.setMaxLines(TableViewConstants.CELL_TEXT_MAX_LINE_COUNT);
+        if (TableViewConstants.CELL_TEXT_ELLIPSIZE)
+        {
+            textView.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
+        }
 
         return textView;
     }
@@ -567,6 +620,7 @@ public final class CustomizedTableView {
             String id = "dataCol" + i;
             String value = String.valueOf(i + 1);
             TableViewCellBean cell = new TableViewCellBean(id, value);
+            cell.setGravity(Gravity.CENTER);
             this.mRowDatas.get(i).getColumnCells().add(0, cell);
         }
         for (int i=0; i< this.mHeaders.size(); i++)
@@ -577,6 +631,7 @@ public final class CustomizedTableView {
                 String id = "headerCol" + i;
                 String value = " No. ";
                 TableViewCellBean cell = new TableViewCellBean(id, value);
+                cell.setGravity(Gravity.CENTER);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
             else
@@ -585,6 +640,7 @@ public final class CustomizedTableView {
                 String id = "headerCol" + i;
                 String value = "";
                 TableViewCellBean cell = new TableViewCellBean(id, value);
+                cell.setGravity(Gravity.CENTER);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
         }
@@ -764,6 +820,7 @@ public final class CustomizedTableView {
         private boolean mAutoFits;
         private boolean mShortTextFlag;
         private int mFixColumnCount;
+        private int mPageCount;
         private int mMaxFieldWidth;
         private int mMaxFieldHeight;
         private int mMinFieldWidth;
@@ -809,7 +866,10 @@ public final class CustomizedTableView {
             this.mFixColumnCount = fixColumnCount;
             return this;
         }
-
+        public Builder pageCount(int pageCount) {
+            this.mPageCount = pageCount;
+            return this;
+        }
         public Builder fixRowCount(int fixRowCount) {
             this.mFixRowCount = fixRowCount;
             return this;
@@ -848,9 +908,12 @@ public final class CustomizedTableView {
             mAutoFits = true;
             mShortTextFlag = false;
             mWrapRowFlag = false;
+            mMinFieldWidth = 30;
+            mMinFieldHeight = 25;
             mMaxFieldWidth = 300;
-            mMaxFieldHeight = 75;
+            mMaxFieldHeight = 45;
             mFixRowCount = 1;
+            mPageCount = 1;
         }
     }
 

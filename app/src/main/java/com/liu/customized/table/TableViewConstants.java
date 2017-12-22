@@ -1,5 +1,7 @@
 package com.liu.customized.table;
 
+import android.view.Gravity;
+
 /**
  * Created by liu.jianfei on 2017/12/21.
  */
@@ -16,9 +18,14 @@ public class TableViewConstants {
     public static final int CELL_MARGIN_LEFT = 0;
     public static final int CELL_MARGIN_RIGHT = 0;
     public static final int CELL_MARGIN_BOTTOM = 0;
-
+    public static final int CELL_TEXT_MAX_LINE_COUNT = 2;
+    public static final boolean CELL_TEXT_ELLIPSIZE = true;
     public static final int CELL_PADDING_TOP = 0;
     public static final int CELL_PADDING_LEFT = 10;
     public static final int CELL_PADDING_RIGHT = 10;
     public static final int CELL_PADDING_BOTTOM = 0;
+    public static final String HEADER_SORT_TEXT_ASC = "△";
+    public static final String HEADER_SORT_TEXT_DESC = "▽";
+    public static final int PER_PAGE_OF_ITEM_COUNT = 40;
+    public static final int DEFAULT_CELL_GRAVITY = Gravity.CENTER;
 }

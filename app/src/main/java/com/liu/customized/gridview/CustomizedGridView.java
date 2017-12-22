@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -436,28 +437,28 @@ public final class CustomizedGridView {
 
         for (int i=0; i< this.mRowDatas.size(); i++)
         {
-            GridViewRowBean row = this.mRowDatas.get(i);
             String id = "dataCol" + i;
             String value = String.valueOf(i + 1);
             GridViewCellBean cell = new GridViewCellBean(id, value);
+            cell.setGravity(Gravity.TOP | Gravity.RIGHT);
             this.mRowDatas.get(i).getColumnCells().add(0, cell);
         }
         for (int i=0; i< this.mHeaders.size(); i++)
         {
             if (i == 0)
             {
-                GridViewRowBean row = this.mHeaders.get(i);
                 String id = "headerCol" + i;
                 String value = " No. ";
                 GridViewCellBean cell = new GridViewCellBean(id, value);
+                cell.setGravity(Gravity.CENTER);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
             else
             {
-                GridViewRowBean row = this.mHeaders.get(i);
                 String id = "headerCol" + i;
                 String value = "";
                 GridViewCellBean cell = new GridViewCellBean(id, value);
+                cell.setGravity(Gravity.CENTER);
                 this.mHeaders.get(i).getColumnCells().add(0, cell);
             }
         }
