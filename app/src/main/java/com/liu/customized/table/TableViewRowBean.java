@@ -9,7 +9,6 @@ import java.util.List;
 public class TableViewRowBean {
     private String id;
     private int rowNumber;
-    private boolean wrap;
     private List<TableViewCellBean> columnCells;
 
     public String getId() {
@@ -26,14 +25,6 @@ public class TableViewRowBean {
 
     public void setRowNumber(int rowNumber) {
         this.rowNumber = rowNumber;
-    }
-
-    public boolean isWrap() {
-        return wrap;
-    }
-
-    public void setWrap(boolean wrap) {
-        this.wrap = wrap;
     }
 
     public List<TableViewCellBean> getColumnCells() {

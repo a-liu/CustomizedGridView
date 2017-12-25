@@ -12,4 +12,8 @@
     <color name="transparent">#00000000</color>
     <color name="colorTextForePrimary">#636363</color>
     <color name="colorAccent">#ccFF4081</color>
+    <color name="colorGridHeaderSplitLine">#FFFFFF</color>
+    <color name="colorGridDataSplitLine">#D6D7D7</color>
+    <color name="colorFirstGridBackgroud">#FFFFFF</color>
+    <color name="colorSecondGridBackgroud">#BCD2EE</color>
 </resources>

@@ -1,9 +1,12 @@
 package com.liu.customized.table;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
@@ -14,13 +17,13 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.liu.customized.R;
-import com.liu.customized.gridview.GridViewBeanComparator;
-import com.liu.customized.gridview.GridViewHeaderRowAdapter;
+import com.liu.customized.dialog.LoadingDialog;
 import com.liu.utils.DisplayUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -34,8 +37,10 @@ import java.util.List;
  */
 
 public final class CustomizedTableView {
+    public static final String WAIT_DIALOG_TAG = "WAIT_DIALOG";
+
     private OnTableViewRowHeaderActionListener mOnTableViewRowHeaderActionListener;
-    public void setmOnTableViewRowHeaderActionListener(OnTableViewRowHeaderActionListener listener)
+    public void setOnTableViewRowHeaderActionListener(OnTableViewRowHeaderActionListener listener)
     {
         mOnTableViewRowHeaderActionListener = listener;
     }
@@ -44,11 +49,8 @@ public final class CustomizedTableView {
      */
     private CustomizedTableViewLayout mGridViewLayout;
 
-
-    private int parentContainerWidth = 0;
-
     private View mRootView;
-    private boolean mLoading;
+
     private Activity mContext;
     private final int mViewId;
     private List<TableViewRowBean> mHeaders;
@@ -61,7 +63,6 @@ public final class CustomizedTableView {
     private boolean mWrapRowFlag;
     private boolean mAutoFits;
     private boolean mShortTextFlag;
-    private int mTotalColumnSpan;
     private int mPageCount;
     private int mFixColumnCount;
     private int mFixRowCount;
@@ -97,9 +98,13 @@ public final class CustomizedTableView {
 
     /* Init Grid View */
     private void loadGridView() {
+
         mGridViewLayout = (CustomizedTableViewLayout) mRootView.findViewById(mViewId);
 
         mGridViewLayout.setGridView(this);
+
+        LoadingDialog dialog = LoadingDialog.newInstance(true);
+        dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
 
         // 行号
         this.addFixRowNumbers();
@@ -124,6 +129,16 @@ public final class CustomizedTableView {
                             i,
                             j);
                     layoutView.addView(view);
+                    // 分隔线
+                    if (j != this.mLeftHeaders.get(i).getColumnCells().size()) {
+                        View splitView = new View(mContext);
+                        ViewGroup.LayoutParams splitViewParmas = new ViewGroup.LayoutParams(DisplayUtils.dip2px(mContext, 1),
+                                ViewGroup.LayoutParams.MATCH_PARENT);
+                        splitView.setLayoutParams(splitViewParmas);
+                        splitView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorGridHeaderSplitLine));
+                        layoutView.addView(splitView);
+                    }
+
                     final int colIndex = j;
                     view.setOnTouchListener(new View.OnTouchListener() {
                         @Override
@@ -139,14 +154,26 @@ public final class CustomizedTableView {
                                         text = text.substring(0, text.length() - 1);
                                         text += TableViewConstants.HEADER_SORT_TEXT_DESC;
                                         view.setText(text);
-                                        mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
+                                        if (mOnTableViewRowHeaderActionListener != null)
+                                        {
+                                            LoadingDialog dialog = LoadingDialog.newInstance(true);
+                                            dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+                                            mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
+                                        }
+
                                     }
                                     else
                                     {
                                         text = text.substring(0, text.length() - 1);
                                         text += TableViewConstants.HEADER_SORT_TEXT_ASC;
                                         view.setText(text);
-                                        mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
+                                        if (mOnTableViewRowHeaderActionListener != null)
+                                        {
+                                            LoadingDialog dialog = LoadingDialog.newInstance(true);
+                                            dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+                                            mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
+                                        }
+
                                     }
                                 }
                                 mCurrentDownEvent = MotionEvent.obtain(event);
@@ -174,6 +201,15 @@ public final class CustomizedTableView {
                             i,
                             j + mFixColumnCount);
                     layoutView.addView(view);
+                    // 分隔线
+                    if (j != this.mRightHeaders.get(i).getColumnCells().size() - 1) {
+                        View splitView = new View(mContext);
+                        ViewGroup.LayoutParams splitViewParmas = new ViewGroup.LayoutParams(DisplayUtils.dip2px(mContext, 1),
+                                ViewGroup.LayoutParams.MATCH_PARENT);
+                        splitView.setLayoutParams(splitViewParmas);
+                        splitView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorGridHeaderSplitLine));
+                        layoutView.addView(splitView);
+                    }
                     final int colIndex = j;
                     view.setOnTouchListener(new View.OnTouchListener() {
                         @Override
@@ -227,6 +263,15 @@ public final class CustomizedTableView {
                     mTableFieldWidth,
                     mTableFieldHeight);
             view.setAdapter(mDataBodyAdapter);
+            mDataBodyAdapter.setOnViewLoadOverListener(new TableViewDataBodyAdapter.OnViewLoadOverListener() {
+                @Override
+                public void onViewLoadOver() {
+                    if (mOnLoadCompleteListener != null)
+                    {
+                        mOnLoadCompleteListener.onLoadComplete(view);
+                    }
+                }
+            });
             view.setOnScrollPositionToEndListener(new VRecyclerView.OnScrollPositionToEndListener() {
                 @Override
                 public void onScrollPositionToEnd() {
@@ -238,7 +283,8 @@ public final class CustomizedTableView {
                         return;
                     }
 
-
+                    LoadingDialog dialog = LoadingDialog.newInstance(true);
+                    dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
                     (new Handler()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -265,6 +311,7 @@ public final class CustomizedTableView {
             // 水平滚动条
             final HScrollView hHeaderScrollView = (HScrollView)mGridViewLayout.findViewById(
                     R.id.table_header_right_h_scroll);
+            hHeaderScrollView.setToucheEnabled(false);
             mDataBodyAdapter.setScrollViewListener(new HScrollView.ScrollViewListener() {
                 @Override
                 public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
@@ -276,7 +323,7 @@ public final class CustomizedTableView {
             });
         }
 
-        this.setmOnTableViewRowHeaderActionListener(new OnTableViewRowHeaderActionListener() {
+        this.setOnTableViewRowHeaderActionListener(new OnTableViewRowHeaderActionListener() {
             @Override
             public void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType) {
                 // 数据排序
@@ -291,27 +338,6 @@ public final class CustomizedTableView {
                 mDataBodyAdapter.setLeftRowDatas(mLeftRowDatas);
                 mDataBodyAdapter.setRightRowDatas(mRightRowDatas);
                 mDataBodyAdapter.notifyDataSetChanged();
-//                final GridViewDataListAdapter rightAdapter = mGridViewDataRightAdapter;
-//                Handler rightHandler= new Handler();
-//                rightHandler.post(new Runnable(){
-//                    @Override
-//                    public void run() {
-//                        rightAdapter.notifyDataSetChanged();
-//                    }
-//                });
-//                if (!mWrapRowFlag)
-//                {
-//                    mGridViewDataLeftAdapter.setDataRows(mLeftRowDatas);
-//                    final GridViewDataListAdapter leftAdapter = mGridViewDataLeftAdapter;
-//
-//                    Handler leftHandler= new Handler();
-//                    leftHandler.post(new Runnable(){
-//                        @Override
-//                        public void run() {
-//                            leftAdapter.notifyDataSetChanged();
-//                        }
-//                    });
-//                }
             }
         });
 
@@ -562,6 +588,8 @@ public final class CustomizedTableView {
                 TableViewConstants.CELL_MARGIN_RIGHT,
                 TableViewConstants.CELL_MARGIN_BOTTOM);
         textView.setBackgroundResource(R.drawable.table_header_label_bg);
+        textView.setTextColor(Color.WHITE);
+        textView.getPaint().setFakeBoldText(true);
         textView.setLayoutParams(textViewParams);
         textView.setPadding(TableViewConstants.CELL_PADDING_LEFT,
                 TableViewConstants.CELL_PADDING_TOP,
@@ -756,116 +784,14 @@ public final class CustomizedTableView {
         return result;
     }
 
-    /**
-     * 设定各单元格行列值
-     * @param rowDatas
-     */
-    private void calculateRowColSetting(List<TableViewRowBean> rowDatas) {
-        for (int k = 0; k < rowDatas.size(); k++) {
-            List<TableViewCellBean> cells = rowDatas.get(k).getColumnCells();
-            for(int i=0; i< cells.size(); i++)
-            {
-                cells.get(i).setRowNumber(k);
-                cells.get(i).setColNumber(i);
-            }
-        }
+    private OnLoadCompleteListener mOnLoadCompleteListener;
+    public void setOnLoadCompleteListener(OnLoadCompleteListener onLoadCompleteListener) {
+        mOnLoadCompleteListener = onLoadCompleteListener;
+    }
+    public interface OnLoadCompleteListener{
+        void onLoadComplete(View view);
     }
 
-    /**
-     * 计算列宽
-     * @param rowDatas
-     */
-    private void calculateColSpan(List<TableViewRowBean> headers, List<TableViewRowBean> rowDatas, int[] lengthDatas)
-    {
-        if (lengthDatas == null)
-        {
-            return;
-        }
-        for (int k=0; k< rowDatas.size(); k++)
-        {
-            List<TableViewCellBean> cells = rowDatas.get(k).getColumnCells();
-            int colSpan = 0;
-            boolean newLine = true;
-            for(int i=0; i< cells.size(); i++)
-            {
-                int span = 0;
-                int headerSpan = 0;
-                if (!mWrapRowFlag)
-                {
-                    span = lengthDatas[i] + TableViewConstants.CELL_BLANK_LENGTH;
-                }
-                else
-                {
-                    span = lengthDatas[i];
-                }
-                if (headers.get(0).getColumnCells().get(i).getText() != null && !newLine)
-                {
-                    try {
-                        headerSpan = headers.get(0).getColumnCells().get(i).getText().getBytes("GBK").length + 1;
-                    } catch (UnsupportedEncodingException e) {
-                        headerSpan = headers.get(0).getColumnCells().get(i).getText().getBytes().length + 1;
-                    }
-                }
-                colSpan = colSpan + span + headerSpan;
-                if (i < cells.size() - 1)
-                {
-                    int nextSpan = 0;
-                    int nextHeaderSpan = 0;
-                    if (!mWrapRowFlag)
-                    {
-                        nextSpan = lengthDatas[i + 1] + TableViewConstants.CELL_BLANK_LENGTH;
-                    }
-                    else
-                    {
-                        nextSpan = lengthDatas[+ 1];
-                    }
-                    if (headers.get(0).getColumnCells().get(i+1).getText() != null && !newLine)
-                    {
-                        try {
-                            nextHeaderSpan = headers.get(0).getColumnCells().get(i+1).getText().getBytes("GBK").length + 1;
-                        } catch (UnsupportedEncodingException e) {
-                            nextHeaderSpan = headers.get(0).getColumnCells().get(i+1).getText().getBytes().length + 1;
-                        }
-                    }
-                    nextSpan += nextHeaderSpan;
-                    if (colSpan + nextSpan > mTotalColumnSpan)
-                    {
-                        span += mTotalColumnSpan - colSpan;
-                        colSpan = 0;
-                        if (newLine)
-                        {
-                            newLine = false;
-                        }
-                    }
-                }
-                else {
-                    span += mTotalColumnSpan - colSpan;
-                    colSpan = 0;
-                    if (newLine)
-                    {
-                        newLine = false;
-                    }
-                }
-                cells.get(i).setColSpan(span + headerSpan);
-            }
-        }
-        for(int i=0; i<headers.size(); i++)
-        {
-            List<TableViewCellBean> cells = headers.get(i).getColumnCells();
-            for(int j=0; j< cells.size(); j++)
-            {
-                cells.get(j).setColSpan(rowDatas.get(0).getColumnCells().get(j).getColSpan());
-            }
-        }
-    }
-
-    public void setOnLoadCompleteListener(CustomizedTableViewLayout.OnLoadCompleteListener listener)
-    {
-        if (this.mGridViewLayout != null)
-        {
-            mGridViewLayout.setOnLoadCompleteListener(listener);
-        }
-    }
     public static class Builder {
         private Activity mContext;
         private View mRootView;
@@ -981,7 +907,6 @@ public final class CustomizedTableView {
 
         @Override
         protected void onPreExecute() {
-            mLoading = true;
             super.onPreExecute();
         }
 
@@ -1016,8 +941,6 @@ public final class CustomizedTableView {
         public void handleMessage(Message msg) {
             CustomizedTableView gridView = mWrapGridView.get();
             if (gridView != null) {
-                gridView.mLoading = false;
-
             }
         }
     }

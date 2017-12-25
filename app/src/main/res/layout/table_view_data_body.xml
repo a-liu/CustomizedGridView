@@ -8,6 +8,7 @@
             android:id="@+id/customized_table_body_left_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/table_content_text_bg"
             >
         </android.support.v7.widget.RecyclerView>
         <com.liu.customized.table.HScrollView
@@ -22,6 +23,7 @@
                 android:id="@+id/customized_table_body_right_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/table_content_text_bg"
                 >
             </com.liu.customized.table.VRecyclerView>
         </com.liu.customized.table.HScrollView>

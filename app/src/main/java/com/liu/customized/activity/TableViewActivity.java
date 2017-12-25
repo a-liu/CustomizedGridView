@@ -1,12 +1,15 @@
 package com.liu.customized.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 
 import com.liu.customized.R;
+import com.liu.customized.dialog.LoadingDialog;
 import com.liu.customized.table.CustomizedTableView;
 import com.liu.customized.table.CustomizedTableViewLayout;
 import com.liu.customized.table.TableViewCellBean;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TableViewActivity extends AppCompatActivity {
+
     private List<TableViewRowBean> rowHeaders = new ArrayList<>();
     private List<TableViewRowBean> rowDatas = new ArrayList<>();
 
@@ -48,7 +52,6 @@ public class TableViewActivity extends AppCompatActivity {
             TableViewRowBean rowBean = new TableViewRowBean();
             int rowIndex = i+1;
             rowBean.setId("row" + rowIndex);
-            rowBean.setWrap(false);
             rowBean.setRowNumber(rowIndex);
             List<TableViewCellBean> rowCells = new ArrayList<TableViewCellBean>();
             for(int j=0; j< headerValues.length; j++)
@@ -68,7 +71,6 @@ public class TableViewActivity extends AppCompatActivity {
             TableViewRowBean rowBean = new TableViewRowBean();
             int rowIndex = i+1;
             rowBean.setId("row" + rowIndex);
-            rowBean.setWrap(false);
             rowBean.setRowNumber(rowIndex);
             List<TableViewCellBean> rowCells = new ArrayList<TableViewCellBean>();
             for(int j=0; j< bodyValues.length; j++)
@@ -76,7 +78,7 @@ public class TableViewActivity extends AppCompatActivity {
                 int colIndex = j+1;
                 TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex,  "(" + rowIndex + ":" + colIndex + ")" + bodyValues[j]);
 //                TableViewCellBean cellBean = new TableViewCellBean("col" + colIndex, String.format("%d%d:%s",rowIndex, colIndex, bodyValues[j]));
-                cellBean.setGravity(Gravity.LEFT + Gravity.CENTER);
+                cellBean.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
                 rowCells.add(cellBean);
             }
 
@@ -90,15 +92,20 @@ public class TableViewActivity extends AppCompatActivity {
                     .rowDatas(rowDatas)
                     .allRowExpand(false)
                     .wrapRowFlag(false)
-                    .minFieldHeight(50)
-                    .maxFieldHeight(50)
+                    .minFieldHeight(40)
+                    .maxFieldHeight(40)
                     .maxFieldWidth(200)
                     .fixColumnCount(1)
                     .build();
-            view.setOnLoadCompleteListener(new CustomizedTableViewLayout.OnLoadCompleteListener(){
+            view.setOnLoadCompleteListener(new CustomizedTableView.OnLoadCompleteListener(){
                 @Override
                 public void onLoadComplete(View view) {
                     Log.d("CustomizedTableView", "loadComplete..............");
+                    Fragment frag = TableViewActivity.this.getSupportFragmentManager().findFragmentByTag( CustomizedTableView.WAIT_DIALOG_TAG);
+                    if (frag != null && frag instanceof DialogFragment) {
+                        DialogFragment dialog = (DialogFragment) frag;
+                        dialog.dismiss();
+                    }
                 }
             });
         } catch (Exception e) {

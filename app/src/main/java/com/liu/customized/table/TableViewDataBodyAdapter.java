@@ -1,11 +1,13 @@
 package com.liu.customized.table;
 
 import android.app.Activity;
+import android.graphics.drawable.GradientDrawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -69,6 +71,12 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
     private int[] mTableFieldWidth;
     private int[] mTableFieldHeight;
 
+    private OnViewLoadOverListener mOnViewLoadOverListener;
+    public void setOnViewLoadOverListener(OnViewLoadOverListener listener)
+    {
+        mOnViewLoadOverListener = listener;
+    }
+
     public TableViewDataBodyAdapter(Activity context,
                                     int fixRowCount,
                                     int fixColumnCount,
@@ -109,7 +117,7 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
                             mTableFieldWidth,
                             mTableFieldHeight);
             holder.mDataLeftView.setAdapter(mLeftTableViewDataBodyItemAdapter);
-
+//        holder.mDataLeftView.addItemDecoration(new TableViewDecoration(mContext, TableViewDecoration.HORIZONTAL_LIST));
 
         LinearLayoutManager rightLayoutManager = new LinearLayoutManager(mContext);
         rightLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -122,7 +130,20 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
                             mTableFieldWidth,
                             mTableFieldHeight);
         holder.mDataRightView.setAdapter(mRightTableViewDataBodyItemAdapter);
+//        holder.mDataRightView.addItemDecoration(new TableViewDecoration(mContext, TableViewDecoration.VERTICAL_LIST));
 
+        holder.mDataRightView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+                public void onGlobalLayout() {
+                    //At this point the layout is complete and the 
+                    //dimensions of recyclerView and any child views are known.
+                    if (mOnViewLoadOverListener != null)
+                    {
+                        mOnViewLoadOverListener.onViewLoadOver();
+                    }
+                }
+            });
         holder.mHorizontalScroller.setScrollViewListener(new HScrollView.ScrollViewListener() {
             @Override
             public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
@@ -153,6 +174,9 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
         }
     }
 
+    public interface OnViewLoadOverListener {
+        void onViewLoadOver();
+    }
 
 
 }

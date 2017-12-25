@@ -18,10 +18,6 @@ import com.liu.customized.R;
 
 public class CustomizedTableViewLayout extends ViewGroup {
     private CustomizedTableView mTableViewManage;
-    private OnLoadCompleteListener mOnLoadCompleteListener;
-    public void setOnLoadCompleteListener(OnLoadCompleteListener onLoadCompleteListener) {
-        mOnLoadCompleteListener = onLoadCompleteListener;
-    }
 
     public CustomizedTableViewLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -209,13 +205,6 @@ public class CustomizedTableViewLayout extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mOnLoadCompleteListener != null)
-        {
-            mOnLoadCompleteListener.onLoadComplete(this);
-        }
     }
 
-    public interface OnLoadCompleteListener{
-        void onLoadComplete(View view);
-    }
 }
