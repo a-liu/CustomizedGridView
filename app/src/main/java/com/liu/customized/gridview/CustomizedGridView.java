@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.liu.customized.R;
+import com.liu.customized.table.CustomizedTableView;
 import com.liu.utils.DisplayUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -93,6 +95,22 @@ public final class CustomizedGridView {
         this.mAutoFits = builder.mAutoFits;
         this.mShortTextFlag = builder.mShortTextFlag;
         this.mFixColumnCount = builder.mfixColumnCount;
+
+        // useage
+//        Log.d("CustomizedTableView", "loadStart..............");
+//        CustomizedTableView view = new CustomizedTableView.Builder(this, R.id.customized_table_view_layout)
+//                .headers(rowHeaders)
+//                .rowDatas(rowDatas)
+//                .minFieldHeight(40)
+//                .maxFieldHeight(40)
+//                .maxFieldWidth(200)
+//                .build();
+//        view.setOnLoadCompleteListener(new CustomizedTableView.OnLoadCompleteListener(){
+//            @Override
+//            public void onLoadComplete(View view) {
+//                Log.d("CustomizedTableView", "loadComplete..............");
+//            }
+//        });
     }
 
     /* Init Grid View */
