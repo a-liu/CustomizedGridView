@@ -89,12 +89,9 @@ public class TableViewActivity extends AppCompatActivity {
             CustomizedTableView view = new CustomizedTableView.Builder(this, R.id.customized_table_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
-                    .allRowExpand(false)
-                    .wrapRowFlag(false)
                     .minFieldHeight(40)
                     .maxFieldHeight(40)
                     .maxFieldWidth(200)
-                    .fixColumnCount(1)
                     .build();
             view.setOnLoadCompleteListener(new CustomizedTableView.OnLoadCompleteListener(){
                 @Override

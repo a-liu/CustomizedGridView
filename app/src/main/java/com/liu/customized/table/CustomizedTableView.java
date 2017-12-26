@@ -882,33 +882,33 @@ public final class CustomizedTableView {
             return this;
         }
 
-        public Builder allRowExpand(boolean allRowExpand) {
-            this.mAllRowExpandFlag = allRowExpand;
-            return this;
-        }
-
-        public Builder shortText(boolean shortText) {
-            this.mShortTextFlag = shortText;
-            return this;
-        }
-
-        public Builder wrapRowFlag(boolean wrapRowFlag) {
-            this.mWrapRowFlag = wrapRowFlag;
-            return this;
-        }
+//        public Builder allRowExpand(boolean allRowExpand) {
+//            this.mAllRowExpandFlag = allRowExpand;
+//            return this;
+//        }
+//
+//        public Builder shortText(boolean shortText) {
+//            this.mShortTextFlag = shortText;
+//            return this;
+//        }
+//
+//        public Builder wrapRowFlag(boolean wrapRowFlag) {
+//            this.mWrapRowFlag = wrapRowFlag;
+//            return this;
+//        }
 
         public Builder fixColumnCount(int fixColumnCount) {
             this.mFixColumnCount = fixColumnCount;
             return this;
         }
-        public Builder pageCount(int pageCount) {
-            this.mPageCount = pageCount;
-            return this;
-        }
-        public Builder fixRowCount(int fixRowCount) {
-            this.mFixRowCount = fixRowCount;
-            return this;
-        }
+//        public Builder pageCount(int pageCount) {
+//            this.mPageCount = pageCount;
+//            return this;
+//        }
+//        public Builder fixRowCount(int fixRowCount) {
+//            this.mFixRowCount = fixRowCount;
+//            return this;
+//        }
 
         public Builder minFieldWidth(int minFieldWidth) {
             this.mMinFieldWidth = minFieldWidth;
@@ -951,10 +951,11 @@ public final class CustomizedTableView {
             mShortTextFlag = false;
             mWrapRowFlag = false;
             mMinFieldWidth = 30;
-            mMinFieldHeight = 25;
+            mMinFieldHeight = 40;
             mMaxFieldWidth = 300;
             mMaxFieldHeight = 45;
             mFixRowCount = 1;
+            mFixColumnCount = 1;
             if (mPageCount == 0)
             {
                 mPageCount = 1;
