@@ -77,7 +77,6 @@ public final class CustomizedTableView {
     private int[] mTableFieldWidth;
     private int[] mTableFieldHeight;
 
-    private HScrollView.ScrollViewListener mScrollViewListener;
     /**
      * Private Constructor to insure WrapGridView can't be initiated the default way
      */
@@ -295,8 +294,7 @@ public final class CustomizedTableView {
                     // 加载下一页数据
                     mPageCount += 1;
 
-                    WaitingDialog dialog = WaitingDialog.newInstance();
-                    dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+                    showWaitDialog();
                     (new Handler()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -346,6 +344,7 @@ public final class CustomizedTableView {
             final HScrollView hHeaderScrollView = (HScrollView)mGridViewLayout.findViewById(
                     R.id.table_header_right_h_scroll);
             hHeaderScrollView.setToucheEnabled(false);
+            hHeaderScrollView.smoothScrollTo(0, 0);
             mDataBodyAdapter.setScrollViewListener(new HScrollView.ScrollViewListener() {
                 @Override
                 public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
@@ -361,14 +360,7 @@ public final class CustomizedTableView {
             @Override
             public void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType) {
 
-                final WaitingDialog dialog = WaitingDialog.newInstance();
-                (new Handler()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
-                    }
-                });
-
+                showWaitDialog();
                 final int pos = position;
                 final int offset = positionOffset;
                 final TableViewBeanComparator.ORDER_TYPE type = orderType;
@@ -396,6 +388,12 @@ public final class CustomizedTableView {
         });
 
     }
+
+    private void showWaitDialog() {
+        final WaitingDialog dialog = WaitingDialog.newInstance();
+        dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+    }
+
     private void fixColumnSetting() {
         if (mFixColumnCount <= 0 || this.mWrapRowFlag)
         {
@@ -936,16 +934,14 @@ public final class CustomizedTableView {
          */
         public CustomizedTableView build() {
             final CustomizedTableView gridView = new CustomizedTableView(this);
-            WaitingDialog dialog = WaitingDialog.newInstance();
-            dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
-            (new Handler()).postDelayed(new Runnable(){
-                @Override
-                public void run() {
-
-                }
-            }, 100);
+            gridView.showWaitDialog();
+//            (new Handler()).postDelayed(new Runnable(){
+//                @Override
+//                public void run() {
+//                    // grid 设置无效，焦点混乱
+//                }
+//            }, 100);
             gridView.loadGridView();
-
             return gridView;
         }
 
