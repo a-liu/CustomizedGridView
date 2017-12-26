@@ -1,6 +1,8 @@
 package com.liu.customized.table;
 
 import android.app.Activity;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
@@ -23,8 +25,6 @@ import java.util.List;
 public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableViewDataBodyItemAdapter.ViewHolder> {
     private List<TableViewRowBean> mRowDatas;
     private Activity mContext;
-    private List<TableViewCellBean> mHeaders;
-    private float xDown,yDown, xUp;
     private int mFixColumnCount;
     private int mFixRowCount;
     private int[] mTableFieldWidth;
@@ -53,7 +53,7 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
     @Override
     public TableViewDataBodyItemAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = null;
-        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.table_view_data_body_item, parent, false);
+        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.table_view_data_body_item, null, false);
         final ViewHolder vh = new ViewHolder(view);
         return vh;
     }
@@ -135,15 +135,36 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
         {
             textView.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
         }
+
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String text = textView.getText() + "";
-                Toast.makeText(mContext, text,
-                        Toast.LENGTH_SHORT).show();
+                int ellipsisCount = textView.getLayout().getEllipsisCount(textView.getLineCount() - 1);
+                if (ellipsisCount > 0) {
+                    Toast.makeText(mContext, text,
+                            Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    textView.setOnClickListener(null);
+                }
+
             }
         });
-
+        textView.setLongClickable(true);
+//        textView.setTextIsSelectable(true);
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                TextView textView  =(TextView) v;
+                ClipboardManager cmb = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+                cmb.setText(textView.getText().toString().trim());
+                Toast.makeText(mContext, "复制文本成功",
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
         if ((textView.getGravity() == (Gravity.CENTER | Gravity.LEFT)))
         {
             LinearLayout layout  = new LinearLayout(mContext);
@@ -157,6 +178,36 @@ public class TableViewDataBodyItemAdapter extends RecyclerView.Adapter<TableView
         return textView;
     }
 
+    private TextView getVisualTableTextView(String text, int gravity) {
+        TextView textView = new TextView(mContext);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TableViewConstants.CELL_FONT_SIZE);
+        textView.setText(text);
+        if (gravity == Gravity.NO_GRAVITY)
+        {
+            textView.setGravity(Gravity.CENTER | Gravity.LEFT);
+        }
+        else
+        {
+            textView.setGravity(gravity);
+        }
+
+        //设置布局
+        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        textViewParams.setMargins(TableViewConstants.CELL_MARGIN_LEFT,
+                TableViewConstants.CELL_MARGIN_TOP,
+                TableViewConstants.CELL_MARGIN_RIGHT,
+                TableViewConstants.CELL_MARGIN_BOTTOM);
+        textView.setLayoutParams(textViewParams);
+        textView.setMaxLines(TableViewConstants.CELL_TEXT_MAX_LINE_COUNT);
+        if (TableViewConstants.CELL_TEXT_ELLIPSIZE)
+        {
+            textView.setEllipsize(TextUtils.TruncateAt.valueOf("END"));
+        }
+
+        return textView;
+    }
     public class ViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout linearView;
         public ViewHolder(View view) {

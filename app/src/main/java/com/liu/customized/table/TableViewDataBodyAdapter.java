@@ -2,16 +2,23 @@ package com.liu.customized.table;
 
 import android.app.Activity;
 import android.graphics.drawable.GradientDrawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.liu.customized.R;
+import com.liu.utils.DisplayUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,26 +63,19 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
     {
         mRightRowDatas = datas;
     }
-    private boolean mShortTextFlag;
+
     private Activity mContext;
-    private int mDisplayColumnCount;
-    private int mFirstRowColumnCount;
-    private boolean mWrapRowFlag;
-    private List<TableViewCellBean> mHeaders;
-    private float xDown,yDown, xUp;
-    private boolean isLongClickModule = false;
-    private boolean isLongClicking = false;
     private int mFixColumnCount;
     private int mFixRowCount;
 
     private int[] mTableFieldWidth;
     private int[] mTableFieldHeight;
 
-    private OnViewLoadOverListener mOnViewLoadOverListener;
-    public void setOnViewLoadOverListener(OnViewLoadOverListener listener)
-    {
-        mOnViewLoadOverListener = listener;
-    }
+//    private OnViewLoadOverListener mOnViewLoadOverListener;
+//    public void setOnViewLoadOverListener(OnViewLoadOverListener listener)
+//    {
+//        mOnViewLoadOverListener = listener;
+//    }
 
     public TableViewDataBodyAdapter(Activity context,
                                     int fixRowCount,
@@ -109,7 +109,10 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
         LinearLayoutManager leftLayoutManager = new LinearLayoutManager(mContext);
         leftLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         holder.mDataLeftView.setLayoutManager(leftLayoutManager);
-        mLeftTableViewDataBodyItemAdapter =
+        holder.mDataLeftView.setFocusable(false);
+        if (mLeftTableViewDataBodyItemAdapter == null)
+        {
+            mLeftTableViewDataBodyItemAdapter =
                     new TableViewDataBodyItemAdapter(mContext,
                             mFixRowCount,
                             0,
@@ -117,33 +120,35 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
                             mTableFieldWidth,
                             mTableFieldHeight);
             holder.mDataLeftView.setAdapter(mLeftTableViewDataBodyItemAdapter);
-//        holder.mDataLeftView.addItemDecoration(new TableViewDecoration(mContext, TableViewDecoration.HORIZONTAL_LIST));
+        }
+        else
+        {
+            mLeftTableViewDataBodyItemAdapter.setRowDatas(mLeftRowDatas);
+            mLeftTableViewDataBodyItemAdapter.notifyDataSetChanged();
+        }
 
         LinearLayoutManager rightLayoutManager = new LinearLayoutManager(mContext);
         rightLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         holder.mDataRightView.setLayoutManager(rightLayoutManager);
-        mRightTableViewDataBodyItemAdapter =
+        holder.mDataRightView.setFocusable(false);
+        if (mRightTableViewDataBodyItemAdapter == null)
+        {
+            mRightTableViewDataBodyItemAdapter =
                     new TableViewDataBodyItemAdapter(mContext,
                             mFixRowCount,
                             mFixColumnCount,
                             mRightRowDatas,
                             mTableFieldWidth,
                             mTableFieldHeight);
-        holder.mDataRightView.setAdapter(mRightTableViewDataBodyItemAdapter);
-//        holder.mDataRightView.addItemDecoration(new TableViewDecoration(mContext, TableViewDecoration.VERTICAL_LIST));
+            holder.mDataRightView.setAdapter(mRightTableViewDataBodyItemAdapter);
+        }
+        else
+        {
+            mRightTableViewDataBodyItemAdapter.setRowDatas(mRightRowDatas);
+            mRightTableViewDataBodyItemAdapter.notifyDataSetChanged();
+        }
 
-        holder.mDataRightView.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-                public void onGlobalLayout() {
-                    //At this point the layout is complete and the 
-                    //dimensions of recyclerView and any child views are known.
-                    if (mOnViewLoadOverListener != null)
-                    {
-                        mOnViewLoadOverListener.onViewLoadOver();
-                    }
-                }
-            });
+        // 水平滑动，标题同步
         holder.mHorizontalScroller.setScrollViewListener(new HScrollView.ScrollViewListener() {
             @Override
             public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {
@@ -161,7 +166,6 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
         return 1;
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         public RecyclerView mDataLeftView;
         public RecyclerView mDataRightView;
@@ -174,9 +178,9 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
         }
     }
 
-    public interface OnViewLoadOverListener {
-        void onViewLoadOver();
-    }
+//    public interface OnViewLoadOverListener {
+//        void onViewLoadOver();
+//    }
 
 
 }

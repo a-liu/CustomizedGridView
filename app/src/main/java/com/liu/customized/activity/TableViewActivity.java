@@ -1,20 +1,15 @@
 package com.liu.customized.activity;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 
 import com.liu.customized.R;
-import com.liu.customized.dialog.LoadingDialog;
 import com.liu.customized.table.CustomizedTableView;
-import com.liu.customized.table.CustomizedTableViewLayout;
 import com.liu.customized.table.TableViewCellBean;
 import com.liu.customized.table.TableViewRowBean;
-import com.liu.customized.table.CustomizedTableView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +82,10 @@ public class TableViewActivity extends AppCompatActivity {
         }
         try {
             Log.d("CustomizedTableView", "loadStart..............");
+
+//            WaitingDialog dialog = WaitingDialog.newInstance();
+//            dialog.show(((FragmentActivity)this).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+
             CustomizedTableView view = new CustomizedTableView.Builder(this, R.id.customized_table_view_layout)
                     .headers(rowHeaders)
                     .rowDatas(rowDatas)
@@ -101,11 +100,11 @@ public class TableViewActivity extends AppCompatActivity {
                 @Override
                 public void onLoadComplete(View view) {
                     Log.d("CustomizedTableView", "loadComplete..............");
-                    Fragment frag = TableViewActivity.this.getSupportFragmentManager().findFragmentByTag( CustomizedTableView.WAIT_DIALOG_TAG);
-                    if (frag != null && frag instanceof DialogFragment) {
-                        DialogFragment dialog = (DialogFragment) frag;
-                        dialog.dismiss();
-                    }
+//                    Fragment frag = TableViewActivity.this.getSupportFragmentManager().findFragmentByTag( CustomizedTableView.WAIT_DIALOG_TAG);
+//                    if (frag != null && frag instanceof DialogFragment) {
+//                        DialogFragment dialog = (DialogFragment) frag;
+//                        dialog.dismiss();
+//                    }
                 }
             });
         } catch (Exception e) {

@@ -22,6 +22,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
@@ -35,10 +36,10 @@ import android.widget.TextView;
 
 import com.liu.customized.R;
 
-public class LoadingDialog extends DialogFragment {
+public class WaitingDialog extends DialogFragment {
 
-    private static final String ARG_MESSAGE_ID = LoadingDialog.class.getCanonicalName() + ".ARG_MESSAGE_ID";
-    private static final String ARG_CANCELABLE = LoadingDialog.class.getCanonicalName() + ".ARG_CANCELABLE";
+    private static final String ARG_MESSAGE_ID = WaitingDialog.class.getCanonicalName() + ".ARG_MESSAGE_ID";
+    private static final String ARG_CANCELABLE = WaitingDialog.class.getCanonicalName() + ".ARG_CANCELABLE";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,42 +51,27 @@ public class LoadingDialog extends DialogFragment {
     /**
      * Public factory method to get dialog instances.
      *
-     * @param messageId     Resource id for a message to show in the dialog.
-     * @param cancelable    If 'true', the dialog can be cancelled by the user input (BACK button, touch outside...)
      * @return              New dialog instance, ready to show.
      */
-    public static LoadingDialog newInstance(int messageId, boolean cancelable) {
-        LoadingDialog fragment = new LoadingDialog();
+    public static WaitingDialog newInstance() {
+        WaitingDialog fragment = new WaitingDialog();
         Bundle args = new Bundle();
-        args.putInt(ARG_MESSAGE_ID, messageId);
-        args.putBoolean(ARG_CANCELABLE, cancelable);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    /**
-     * Public factory method to get dialog instances.
-     *
-     * @param cancelable    If 'true', the dialog can be cancelled by the user input (BACK button, touch outside...)
-     * @return              New dialog instance, ready to show.
-     */
-    public static LoadingDialog newInstance(boolean cancelable) {
-        LoadingDialog fragment = new LoadingDialog();
-        Bundle args = new Bundle();
-        args.putBoolean(ARG_CANCELABLE, cancelable);
+        args.putBoolean(ARG_CANCELABLE, false);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        getDialog().getWindow().setBackgroundDrawable(new
+                ColorDrawable(Color.TRANSPARENT));
         // Create a view by inflating desired layout
-        View v = inflater.inflate(R.layout.loading_dialog, container,  false);
+        View v = inflater.inflate(R.layout.waiting_dialog, container,  false);
         v.setBackgroundColor(Color.TRANSPARENT);
         // set message
         TextView tv  = (TextView) v.findViewById(R.id.loadingText);
 //        int messageId = getArguments().getInt(ARG_MESSAGE_ID, "Loading");
-        tv.setText("Loading");
+        tv.setText("");
 
         // set progress wheel color
         ProgressBar progressBar  = (ProgressBar) v.findViewById(R.id.loadingBar);

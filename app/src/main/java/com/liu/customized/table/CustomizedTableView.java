@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,12 +20,13 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.liu.customized.R;
-import com.liu.customized.dialog.LoadingDialog;
+import com.liu.customized.dialog.WaitingDialog;
 import com.liu.utils.DisplayUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -63,7 +66,7 @@ public final class CustomizedTableView {
     private boolean mWrapRowFlag;
     private boolean mAutoFits;
     private boolean mShortTextFlag;
-    private int mPageCount;
+    private static int mPageCount;
     private int mFixColumnCount;
     private int mFixRowCount;
     private int mMaxFieldWidth;
@@ -88,7 +91,10 @@ public final class CustomizedTableView {
         this.mAutoFits = builder.mAutoFits;
         this.mShortTextFlag = builder.mShortTextFlag;
         this.mFixColumnCount = builder.mFixColumnCount;
-        this.mPageCount = builder.mPageCount;
+        if (mPageCount == 0)
+        {
+            mPageCount = builder.mPageCount;
+        }
         this.mFixRowCount = builder.mFixRowCount;
         this.mMinFieldWidth = builder.mMinFieldWidth;
         this.mMinFieldHeight = builder.mMinFieldHeight;
@@ -98,13 +104,9 @@ public final class CustomizedTableView {
 
     /* Init Grid View */
     private void loadGridView() {
-
         mGridViewLayout = (CustomizedTableViewLayout) mRootView.findViewById(mViewId);
 
         mGridViewLayout.setGridView(this);
-
-        LoadingDialog dialog = LoadingDialog.newInstance(true);
-        dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
 
         // 行号
         this.addFixRowNumbers();
@@ -156,8 +158,6 @@ public final class CustomizedTableView {
                                         view.setText(text);
                                         if (mOnTableViewRowHeaderActionListener != null)
                                         {
-                                            LoadingDialog dialog = LoadingDialog.newInstance(true);
-                                            dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
                                             mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.DESC);
                                         }
 
@@ -169,8 +169,6 @@ public final class CustomizedTableView {
                                         view.setText(text);
                                         if (mOnTableViewRowHeaderActionListener != null)
                                         {
-                                            LoadingDialog dialog = LoadingDialog.newInstance(true);
-                                            dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
                                             mOnTableViewRowHeaderActionListener.onDataSort(colIndex, mFixColumnCount, TableViewBeanComparator.ORDER_TYPE.ASC);
                                         }
 
@@ -254,24 +252,36 @@ public final class CustomizedTableView {
             LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
             layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             view.setLayoutManager(layoutManager);
-            mDataBodyAdapter = new TableViewDataBodyAdapter(
-                    mContext,
-                    mFixRowCount,
-                    mFixColumnCount,
-                    mLeftRowDatas,
-                    mRightRowDatas,
-                    mTableFieldWidth,
-                    mTableFieldHeight);
-            view.setAdapter(mDataBodyAdapter);
-            mDataBodyAdapter.setOnViewLoadOverListener(new TableViewDataBodyAdapter.OnViewLoadOverListener() {
-                @Override
-                public void onViewLoadOver() {
-                    if (mOnLoadCompleteListener != null)
-                    {
-                        mOnLoadCompleteListener.onLoadComplete(view);
-                    }
-                }
-            });
+            if (mDataBodyAdapter == null)
+            {
+                mDataBodyAdapter = new TableViewDataBodyAdapter(
+                        mContext,
+                        mFixRowCount,
+                        mFixColumnCount,
+                        mLeftRowDatas,
+                        mRightRowDatas,
+                        mTableFieldWidth,
+                        mTableFieldHeight);
+                view.setAdapter(mDataBodyAdapter);
+            }
+            else
+            {
+                mDataBodyAdapter.setLeftRowDatas(mLeftRowDatas);
+                mDataBodyAdapter.setRightRowDatas(mRightRowDatas);
+                mDataBodyAdapter.notifyRowDataChanged();
+            }
+
+//            mDataBodyAdapter.setOnViewLoadOverListener(new TableViewDataBodyAdapter.OnViewLoadOverListener() {
+//                @Override
+//                public void onViewLoadOver() {
+//                    if (mOnLoadCompleteListener != null)
+//                    {
+//                        mOnLoadCompleteListener.onLoadComplete(view);
+//                    }
+//                }
+//            });
+
+            // 滑动到末尾
             view.setOnScrollPositionToEndListener(new VRecyclerView.OnScrollPositionToEndListener() {
                 @Override
                 public void onScrollPositionToEnd() {
@@ -282,14 +292,14 @@ public final class CustomizedTableView {
                     {
                         return;
                     }
+                    // 加载下一页数据
+                    mPageCount += 1;
 
-                    LoadingDialog dialog = LoadingDialog.newInstance(true);
+                    WaitingDialog dialog = WaitingDialog.newInstance();
                     dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
                     (new Handler()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            // 加载下一页数据
-                            mPageCount += 1;
 
                             // 行号设定
                             resetFixRowNumbers();
@@ -307,6 +317,30 @@ public final class CustomizedTableView {
                 }
             });
 
+            // 数据加载
+            view.getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            //At this point the layout is complete and the 
+                            //dimensions of recyclerView and any child views are known.
+                            if (mOnLoadCompleteListener != null)
+                            {
+                                mOnLoadCompleteListener.onLoadComplete(view);
+                                Fragment frag = ((FragmentActivity)mContext).getSupportFragmentManager().findFragmentByTag( CustomizedTableView.WAIT_DIALOG_TAG);
+                                if (frag != null && frag instanceof DialogFragment) {
+                                    final DialogFragment dialog = (DialogFragment) frag;
+                                    (new Handler()).postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dialog.dismiss();
+                                        }
+                                    }, 2000);
+
+                                }
+                            }
+                        }
+                    });
 
             // 水平滚动条
             final HScrollView hHeaderScrollView = (HScrollView)mGridViewLayout.findViewById(
@@ -326,18 +360,38 @@ public final class CustomizedTableView {
         this.setOnTableViewRowHeaderActionListener(new OnTableViewRowHeaderActionListener() {
             @Override
             public void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType) {
-                // 数据排序
-                Collections.sort(mRowDatas, new TableViewBeanComparator(true, position + positionOffset, orderType));
 
-                // 行号设定
-                resetFixRowNumbers();
+                final WaitingDialog dialog = WaitingDialog.newInstance();
+                (new Handler()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+                    }
+                });
 
-                // 数据重新分割
-                fixColumnSetting();
+                final int pos = position;
+                final int offset = positionOffset;
+                final TableViewBeanComparator.ORDER_TYPE type = orderType;
+                (new Handler()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
 
-                mDataBodyAdapter.setLeftRowDatas(mLeftRowDatas);
-                mDataBodyAdapter.setRightRowDatas(mRightRowDatas);
-                mDataBodyAdapter.notifyDataSetChanged();
+                        // 数据排序
+                        Collections.sort(mRowDatas, new TableViewBeanComparator(true, pos + offset, type));
+
+                        // 行号设定
+                        resetFixRowNumbers();
+
+                        // 数据重新分割
+                        fixColumnSetting();
+
+                        mDataBodyAdapter.setLeftRowDatas(mLeftRowDatas);
+                        mDataBodyAdapter.setRightRowDatas(mRightRowDatas);
+                        mDataBodyAdapter.notifyRowDataChanged();
+                    }
+                }, 200);
+
+
             }
         });
 
@@ -881,8 +935,17 @@ public final class CustomizedTableView {
          * @return Instance of {@link CustomizedTableView} initiated with builder settings
          */
         public CustomizedTableView build() {
-            CustomizedTableView gridView = new CustomizedTableView(this);
+            final CustomizedTableView gridView = new CustomizedTableView(this);
+            WaitingDialog dialog = WaitingDialog.newInstance();
+            dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
+            (new Handler()).postDelayed(new Runnable(){
+                @Override
+                public void run() {
+
+                }
+            }, 100);
             gridView.loadGridView();
+
             return gridView;
         }
 
@@ -896,7 +959,11 @@ public final class CustomizedTableView {
             mMaxFieldWidth = 300;
             mMaxFieldHeight = 45;
             mFixRowCount = 1;
-            mPageCount = 1;
+            if (mPageCount == 0)
+            {
+                mPageCount = 1;
+            }
+
         }
     }
 

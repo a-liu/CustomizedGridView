@@ -201,10 +201,4 @@ public class CustomizedTableViewLayout extends ViewGroup {
             childView.layout(cl, ct, cr, cb);
         }
     }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-    }
-
 }

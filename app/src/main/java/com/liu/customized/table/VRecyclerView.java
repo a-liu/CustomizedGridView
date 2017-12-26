@@ -45,8 +45,8 @@ public class VRecyclerView extends RecyclerView {
         }
     }
 
-
     public interface OnScrollPositionToEndListener{
         void onScrollPositionToEnd();
     }
+
 }

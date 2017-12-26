@@ -58,7 +58,9 @@ android:orientation="vertical">
         <com.liu.customized.table.VRecyclerView
             android:id="@+id/customized_table_layout_body"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
             >
         </com.liu.customized.table.VRecyclerView>
         <!--<LinearLayout-->
