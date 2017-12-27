@@ -149,6 +149,7 @@ public class TableViewDataBodyAdapter extends RecyclerView.Adapter<TableViewData
         }
 
         // 水平滑动，标题同步
+        holder.mHorizontalScroller.setFocusable(false);
         holder.mHorizontalScroller.setScrollViewListener(new HScrollView.ScrollViewListener() {
             @Override
             public void onScrollChanged(HorizontalScrollView scrollView, int x, int y, int oldX, int oldY) {

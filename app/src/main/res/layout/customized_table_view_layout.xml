@@ -54,7 +54,8 @@ android:orientation="vertical">
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/colorSecondary" />
+            android:background="@color/colorSecondary"
+            />
         <com.liu.customized.table.VRecyclerView
             android:id="@+id/customized_table_layout_body"
             android:layout_width="match_parent"

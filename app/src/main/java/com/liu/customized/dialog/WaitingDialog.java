@@ -70,16 +70,17 @@ public class WaitingDialog extends DialogFragment {
         v.setBackgroundColor(Color.TRANSPARENT);
         // set message
         TextView tv  = (TextView) v.findViewById(R.id.loadingText);
+        tv.setTextIsSelectable(false);
 //        int messageId = getArguments().getInt(ARG_MESSAGE_ID, "Loading");
         tv.setText("");
 
         // set progress wheel color
         ProgressBar progressBar  = (ProgressBar) v.findViewById(R.id.loadingBar);
+        progressBar.setFocusable(false);
         progressBar.getIndeterminateDrawable().setColorFilter(
             ContextCompat.getColor(getActivity(), R.color.colorSecondary),
             PorterDuff.Mode.SRC_IN
         );
-
         return v;
     }
 

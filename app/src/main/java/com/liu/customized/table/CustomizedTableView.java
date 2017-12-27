@@ -107,6 +107,9 @@ public final class CustomizedTableView {
 
         mGridViewLayout.setGridView(this);
 
+        // 调整标题列和数据列
+        this.fixHeaderAndDataColumns();
+
         // 行号
         this.addFixRowNumbers();
 
@@ -355,11 +358,29 @@ public final class CustomizedTableView {
                 }
             });
         }
+        if (this.mRowDatas == null || this.mRowDatas.size() == 0)
+        {
+            if (mOnLoadCompleteListener != null)
+            {
+                mOnLoadCompleteListener.onLoadComplete(this.mRootView);
+            }
+            (new Handler()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Fragment frag = ((FragmentActivity)mContext).getSupportFragmentManager().findFragmentByTag( CustomizedTableView.WAIT_DIALOG_TAG);
+                    final DialogFragment dialog = (DialogFragment) frag;
+                    dialog.dismiss();
+                }
+            }, 2000);
+        }
 
         this.setOnTableViewRowHeaderActionListener(new OnTableViewRowHeaderActionListener() {
             @Override
             public void onDataSort(int position, int positionOffset, TableViewBeanComparator.ORDER_TYPE orderType) {
-
+                if (mRowDatas == null || mRowDatas.size() == 0)
+                {
+                    return;
+                }
                 showWaitDialog();
                 final int pos = position;
                 final int offset = positionOffset;
@@ -394,6 +415,76 @@ public final class CustomizedTableView {
         dialog.show(((FragmentActivity)mContext).getSupportFragmentManager(), CustomizedTableView.WAIT_DIALOG_TAG);
     }
 
+    private void fixHeaderAndDataColumns()
+    {
+        // 对齐标题列同数据列
+        int colCount = 0;
+        if (this.mHeaders == null)
+        {
+            this.mHeaders = new ArrayList<>();
+            this.mHeaders.add(new TableViewRowBean());
+            this.mHeaders.get(0).setColumnCells(new ArrayList<TableViewCellBean>());
+        }
+        else
+        {
+            if (this.mHeaders.size() == 0)
+            {
+                this.mHeaders.add(new TableViewRowBean());
+                this.mHeaders.get(0).setColumnCells(new ArrayList<TableViewCellBean>());
+            }
+            else if (this.mHeaders.get(0).getColumnCells() == null)
+            {
+                this.mHeaders.get(0).setColumnCells(new ArrayList<TableViewCellBean>());
+            }
+        }
+        if (colCount < this.mHeaders.get(0).getColumnCells().size())
+        {
+            colCount = this.mHeaders.get(0).getColumnCells().size();
+        }
+        boolean dataRowFixFlag = false;
+        boolean headerRowFixFlag = false;
+        if (this.mRowDatas != null && this.mRowDatas.size() > 0)
+        {
+            if (colCount < this.mRowDatas.get(0).getColumnCells().size())
+            {
+                headerRowFixFlag = true;
+                colCount = this.mRowDatas.get(0).getColumnCells().size();
+            }
+        }
+        for(int i=0; this.mRowDatas != null && i<this.mRowDatas.size(); i++)
+        {
+            if (this.mRowDatas.get(i).getColumnCells() != null &&
+                    colCount < this.mRowDatas.get(i).getColumnCells().size())
+            {
+                colCount = this.mRowDatas.get(i).getColumnCells().size();
+                dataRowFixFlag = true;
+            }
+            if (this.mRowDatas.get(i).getColumnCells() != null &&
+                    colCount > this.mRowDatas.get(i).getColumnCells().size())
+            {
+                dataRowFixFlag = true;
+            }
+        }
+
+        for(int i=0; headerRowFixFlag && i<this.mHeaders.size(); i++)
+        {
+            int fixCount = colCount - this.mHeaders.get(i).getColumnCells().size();
+            for(int j=0; j<fixCount; j++)
+            {
+                this.mHeaders.get(i).getColumnCells().add(new TableViewCellBean("", ""));
+            }
+        }
+
+        for(int i=0; dataRowFixFlag && i<this.mRowDatas.size(); i++)
+        {
+            int fixCount = colCount - this.mRowDatas.get(i).getColumnCells().size();
+            for(int j=0; j<fixCount; j++)
+            {
+                this.mRowDatas.get(i).getColumnCells().add(new TableViewCellBean("", ""));
+            }
+        }
+    }
+
     private void fixColumnSetting() {
         if (mFixColumnCount <= 0 || this.mWrapRowFlag)
         {
@@ -410,7 +501,8 @@ public final class CustomizedTableView {
         mLeftRowDatas = new ArrayList<TableViewRowBean>();
         mRightRowDatas = new ArrayList<TableViewRowBean>();
 
-        for (int j=0; j< this.mHeaders.size(); j++)
+
+        for (int j=0; this.mHeaders != null && j< this.mHeaders.size(); j++)
         {
             TableViewRowBean row = new TableViewRowBean();
             row.setColumnCells(new ArrayList<TableViewCellBean>());
@@ -423,6 +515,23 @@ public final class CustomizedTableView {
             }
         }
 
+        for(int j=0; this.mHeaders != null && j<this.mHeaders.size(); j++)
+        {
+            TableViewRowBean row = new TableViewRowBean();
+            row.setColumnCells(new ArrayList<TableViewCellBean>());
+            row.setId(this.mHeaders.get(j).getId());
+            row.setRowNumber(this.mHeaders.get(j).getRowNumber());
+            mRightHeaders.add(row);
+            for(int i = mFixColumnCount; i< this.mHeaders.get(j).getColumnCells().size(); i++)
+            {
+                row.getColumnCells().add(this.mHeaders.get(j).getColumnCells().get(i));
+            }
+        }
+
+        if (this.mRowDatas == null || this.mRowDatas.size() == 0)
+        {
+            return;
+        }
         int itemCount = TableViewConstants.PER_PAGE_OF_ITEM_COUNT * mPageCount;
         if (itemCount > this.mRowDatas.size())
         {
@@ -441,19 +550,6 @@ public final class CustomizedTableView {
             }
         }
 
-        for(int j=0; j<this.mHeaders.size(); j++)
-        {
-            TableViewRowBean row = new TableViewRowBean();
-            row.setColumnCells(new ArrayList<TableViewCellBean>());
-            row.setId(this.mHeaders.get(j).getId());
-            row.setRowNumber(this.mHeaders.get(j).getRowNumber());
-            mRightHeaders.add(row);
-            for(int i = mFixColumnCount; i< this.mHeaders.get(j).getColumnCells().size(); i++)
-            {
-                row.getColumnCells().add(this.mHeaders.get(j).getColumnCells().get(i));
-            }
-        }
-
         for(int j=0; j<itemCount; j++)
         {
             TableViewRowBean row = new TableViewRowBean();
@@ -466,23 +562,51 @@ public final class CustomizedTableView {
                 row.getColumnCells().add(this.mRowDatas.get(j).getColumnCells().get(i));
             }
         }
-
     }
 
     private void calculateTableFieldWidthAndHeight()
     {
+
         if (mTableFieldWidth == null)
         {
-            mTableFieldWidth = new int[this.mHeaders.get(0).getColumnCells().size()];
+            int colCount = 0;
+            if (this.mHeaders != null && this.mHeaders.size() >0 &&
+                    this.mHeaders.get(0).getColumnCells() != null )
+            {
+                if (colCount < this.mHeaders.get(0).getColumnCells().size())
+                {
+                    colCount = this.mHeaders.get(0).getColumnCells().size();
+                }
+            }
+            if (this.mRowDatas != null && this.mRowDatas.size() >0 &&
+                    this.mRowDatas.get(0).getColumnCells() != null )
+            {
+                if (colCount < this.mRowDatas.get(0).getColumnCells().size())
+                {
+                    colCount = this.mRowDatas.get(0).getColumnCells().size();
+                }
+            }
+            mTableFieldWidth = new int[colCount];
         }
         int rowCount = 0;
-        if (this.mRowDatas == null)
+        if (this.mRowDatas == null || this.mRowDatas.size() == 0)
         {
-            rowCount = this.mHeaders.size();
+            if (this.mHeaders != null)
+            {
+                rowCount = this.mHeaders.size();
+            }
         }
         else
         {
-            rowCount = this.mHeaders.size() + this.mRowDatas.size();
+            if (this.mHeaders != null)
+            {
+                rowCount = this.mHeaders.size() + this.mRowDatas.size();
+            }
+            else
+            {
+                rowCount = this.mRowDatas.size();
+            }
+
         }
         if (mTableFieldHeight == null)
         {
@@ -506,7 +630,7 @@ public final class CustomizedTableView {
 //            }
 //        }
 
-        for (int i=0; i< this.mHeaders.size(); i++)
+        for (int i=0; this.mHeaders != null && i< this.mHeaders.size(); i++)
         {
             for(int j=0; j < this.mHeaders.get(i).getColumnCells().size(); j++)
             {
@@ -526,7 +650,8 @@ public final class CustomizedTableView {
             }
         }
 
-        for(int j=0; mRowDatas != null && j < columnLength.length; j++)
+        for(int j=0; mRowDatas != null && mRowDatas.size() > 0
+                && columnLength != null  && j < columnLength.length; j++)
         {
             String text = String.format("%"+ columnLength[j] + "s","X").replace(" ", "X");
             TextView textView = getVisualTableTextView(text,
@@ -751,7 +876,7 @@ public final class CustomizedTableView {
             return;
         }
 
-        for (int i=0; i< this.mRowDatas.size(); i++)
+        for (int i=0; this.mRowDatas != null && i< this.mRowDatas.size(); i++)
         {
             TableViewRowBean row = this.mRowDatas.get(i);
             String id = "dataCol" + i;
@@ -760,7 +885,7 @@ public final class CustomizedTableView {
             cell.setGravity(Gravity.CENTER);
             this.mRowDatas.get(i).getColumnCells().add(0, cell);
         }
-        for (int i=0; i< this.mHeaders.size(); i++)
+        for (int i=0; this.mHeaders != null && i< this.mHeaders.size(); i++)
         {
             if (i == 0)
             {
@@ -808,7 +933,7 @@ public final class CustomizedTableView {
                 }
             }
         }
-        for (int i=0; i<rowDatas.size(); i++)
+        for (int i=0; rowDatas != null && i<rowDatas.size(); i++)
         {
             for(int j=0;j<rowDatas.get(i).getColumnCells().size(); j++)
             {
